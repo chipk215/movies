@@ -23,6 +23,7 @@
         android:layout_marginTop="4dp"
         android:contentDescription="@string/movie_poster"
         android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintHorizontal_bias="1.0"
