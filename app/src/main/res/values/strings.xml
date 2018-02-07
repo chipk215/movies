@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Movies</string>
+    <string name="btn_retry">Retry</string>
+    <string name="download_error">Oh no! Unable to fetch movie data.</string>
+    <string name="internet_error">Not connected to internet</string>
+    <string name="popular">Popular</string>
+    <string name="top_rated">Top Rated</string>
+    <string name="movie_poster_thumbnail">"Movie Poster Thumbnail"</string>
+
+
+    <!-- Movie Detail Fragment  -->
+    <string name="title">Title</string>
+    <string name="movie_poster">Movie Poster</string>
+    <string name="release_date">Release Date</string>
+    <string name="voter_average">Voter Average</string>
+    <string name="popularity">Popularity</string>
+    <string name="synopsis">Synopsis</string>
+</resources>
