@@ -74,7 +74,6 @@ public class MovieFragment extends Fragment {
         ImageView posterImageView;
         TextView synopsisTextView;
 
-
         View view = inflater.inflate(R.layout.movie_detail_fragment, container, false);
 
         titleTextView = view.findViewById(R.id.title_tv);

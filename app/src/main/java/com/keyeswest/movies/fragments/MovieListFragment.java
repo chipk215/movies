@@ -1,11 +1,8 @@
 package com.keyeswest.movies.fragments;
 
-
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -24,7 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.Button;
-import android.widget.ImageView;
+
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -32,10 +29,10 @@ import android.widget.TextView;
 import com.keyeswest.movies.DetailMovieActivity;
 import com.keyeswest.movies.MovieFetcher;
 import com.keyeswest.movies.R;
+import com.keyeswest.movies.adapters.MovieAdapter;
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
 import com.keyeswest.movies.models.Movie;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,7 +110,6 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
 
     }
 
-
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState){
         super.onSaveInstanceState(outState);
@@ -131,8 +127,6 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
         super.onActivityCreated(savedInstanceState);
         Log.i(TAG, "MovieListFragment onActivityCreated");
     }
-
-
 
     @Override
     public void onDestroy(){
@@ -297,100 +291,23 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
     }
 
 
-    private class MovieHolder extends RecyclerView.ViewHolder implements
-            View.OnClickListener, Target{
-
-        private final ImageView mItemImageView;
-        private Movie mMovie;
-
-        MovieHolder(View itemView){
-            super(itemView);
-
-            mItemImageView = itemView.findViewById(R.id.item_image_view);
-            itemView.setOnClickListener(this);
-        }
-
-        void bindMovieItem(Movie movieItem){
-            mMovie = movieItem;
-            String posterPath = movieItem.getPosterPath();
-            String imagePath = MovieFetcher.getPosterPathURL(posterPath);
-            Log.i(TAG, imagePath);
-            Picasso.with(getContext()).load(imagePath).into(this);
-        }
-
-        @Override
-        public void onClick(View v){
-            //Toast.makeText(getContext(),"Movie clicked", Toast.LENGTH_SHORT).show();
-            Intent intent= DetailMovieActivity.newIntent(getContext(),mMovie);
-
-            try{
-                startActivity(intent);
-
-            }catch (ActivityNotFoundException anf){
-                Log.e(TAG, "Activity not found" + anf);
-            }
-        }
-
-        @Override
-        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-            mItemImageView.setImageBitmap(bitmap);
-        }
-
-        @Override
-        public void onBitmapFailed(Drawable errorDrawable) {
-            // TODO:  provide an error icon, raise network connectivity dialog
-
-            // at this point the errorDrawable has not been set so we can't use it as a substitute
-
-            // internet connectivity failure here is a corner case since we just got the
-            // movie data with network error protection but this case should be handled
-        }
-
-        @Override
-        public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-        }
-    }
-
-
-    private class MovieAdapter extends RecyclerView.Adapter<MovieHolder>{
-
-        private final List<Movie> mMovieItems;
-
-        MovieAdapter(List<Movie> movieItems){
-            mMovieItems = movieItems;
-        }
-
-        @Override
-        public MovieHolder  onCreateViewHolder(ViewGroup viewGroup, int viewType){
-
-            LayoutInflater inflater = LayoutInflater.from(getActivity());
-            View view = inflater.inflate(R.layout.list_item_movie_image,
-                    viewGroup, false);
-
-            return new MovieHolder(view);
-        }
-
-
-        @Override
-        public void onBindViewHolder(MovieHolder movieHolder, int position){
-            Movie movieItem = mMovieItems.get(position);
-            movieHolder.bindMovieItem(movieItem);
-        }
-
-        @Override
-        public int getItemCount(){
-            return mMovieItems.size();
-        }
-
-    }
-
-
     private void setupMovieAdapter(){
 
         // isAdded() confirms that the fragment has been attached to an activity
         if (isAdded()){
-            mMovieRecyclerView.setAdapter(new MovieAdapter(mItems));
+            mMovieRecyclerView.setAdapter(new MovieAdapter(mItems, new MovieAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(Movie movie) {
+                    Intent intent= DetailMovieActivity.newIntent(getContext(),movie);
+
+                    try{
+                        startActivity(intent);
+
+                    }catch (ActivityNotFoundException anf){
+                        Log.e(TAG, "Activity not found" + anf);
+                    }
+                }
+            }));
             mMovieRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
             mMovieRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
