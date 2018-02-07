@@ -7,4 +7,4 @@ An API key is required to use the API. To obtain an API key sign up for a MovieD
 
 The API key will be emailed to you.
 
-In MovieFetcher.java replace the string "Fill In With Your Key" with your MovieDB API key and then install the app and run.
+In MovieFetcher.java replace BuildConfig.API_KEY with your MovieDB API key and then install the app and run.
