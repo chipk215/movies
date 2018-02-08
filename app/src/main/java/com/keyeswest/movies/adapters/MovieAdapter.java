@@ -18,6 +18,9 @@ import com.squareup.picasso.Target;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder> {
 
     public interface OnItemClickListener{
@@ -61,18 +64,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder>
 
         private static final String TAG="MovieHolder";
 
-        private final ImageView mItemImageView;
-        private Movie mMovie;
+        @BindView(R.id.item_image_view) ImageView mItemImageView;
 
         public MovieHolder(View itemView){
             super(itemView);
-
-            mItemImageView = itemView.findViewById(R.id.item_image_view);
+            ButterKnife.bind(this,itemView);
 
         }
 
         public void bindMovieItem(final Movie movieItem, final OnItemClickListener listener){
-            mMovie = movieItem;
             String posterPath = movieItem.getPosterPath();
             String imagePath = MovieFetcher.getPosterPathURL(posterPath);
             Log.i(TAG, imagePath);

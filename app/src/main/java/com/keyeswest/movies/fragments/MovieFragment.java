@@ -18,11 +18,25 @@ import com.squareup.picasso.Picasso;
 
 import java.text.DecimalFormat;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 public class MovieFragment extends Fragment {
     private static final String TAG = "MovieFragment";
     private static final String ARG_MOVIE = "movie_arg";
 
     private Movie mMovie;
+
+    @BindView(R.id.title_tv)TextView mTitleTextView;
+    @BindView(R.id.release_date_tv)TextView mReleaseDateTextView;
+    @BindView(R.id.voter_average_tv)TextView mVoterAverageTextView;
+    @BindView(R.id.popularity_tv)TextView mPopularityTextView;
+    @BindView(R.id.poster_iv)ImageView mPosterImageView;
+    @BindView(R.id.synopsis_tv)TextView mSynopsisTextView;
+
+    private Unbinder mUnbinder;
+
 
 
     /**
@@ -67,38 +81,33 @@ public class MovieFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
 
-        TextView titleTextView;
-        TextView releaseDateTextView;
-        TextView voterAverageTextView;
-        TextView popularityTextView;
-        ImageView posterImageView;
-        TextView synopsisTextView;
-
         View view = inflater.inflate(R.layout.movie_detail_fragment, container, false);
+        mUnbinder = ButterKnife.bind(this, view);
 
-        titleTextView = view.findViewById(R.id.title_tv);
-        titleTextView.setText(mMovie.getOriginalTitle());
 
-        releaseDateTextView = view.findViewById(R.id.release_date_tv);
-        releaseDateTextView.setText(mMovie.getReleaseDate());
+        mTitleTextView.setText(mMovie.getOriginalTitle());
+
+        mReleaseDateTextView.setText(mMovie.getReleaseDate());
 
         DecimalFormat decimalFormat = new DecimalFormat("#.00");
-        voterAverageTextView = view.findViewById(R.id.voter_average_tv);
-        voterAverageTextView.setText(decimalFormat.format(mMovie.getVoteAverage()));
 
-        popularityTextView = view.findViewById(R.id.popularity_tv);
-        popularityTextView.setText(decimalFormat.format(mMovie.getPopularity()));
+        mVoterAverageTextView.setText(decimalFormat.format(mMovie.getVoteAverage()));
 
-        posterImageView = view.findViewById(R.id.poster_iv);
+        mPopularityTextView.setText(decimalFormat.format(mMovie.getPopularity()));
+
         //TODO research - does Picasso get the image from the cache or will the new context force a fetch?
         String imagePath = MovieFetcher.getPosterPathURL(mMovie.getPosterPath());
-        Picasso.with(getContext()).load(imagePath).into( posterImageView);
+        Picasso.with(getContext()).load(imagePath).into(mPosterImageView);
 
-
-        synopsisTextView = view.findViewById(R.id.synopsis_tv);
-        synopsisTextView.setText(mMovie.getOverview());
+        mSynopsisTextView.setText(mMovie.getOverview());
 
         return view;
 
+    }
+
+    @Override
+    public void onDestroyView(){
+        super.onDestroyView();
+        mUnbinder.unbind();
     }
 }

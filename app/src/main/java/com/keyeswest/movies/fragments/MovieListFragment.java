@@ -37,6 +37,10 @@ import com.keyeswest.movies.models.Movie;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 
 public class MovieListFragment extends Fragment implements MovieFetcherCallback {
 
@@ -51,21 +55,23 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
         POPULAR, TOP_RATED
     }
 
-    private RecyclerView mMovieRecyclerView;
+    @BindView(R.id.movie_recycler_view) RecyclerView mMovieRecyclerView;
 
     private final List<Movie> mItems = new ArrayList<>();
 
     private MovieFetcher mMovieFetcher;
 
-    private ProgressBar mLoadingSpinner;
+    @BindView(R.id.loading_spinner) ProgressBar mLoadingSpinner;
 
-    private LinearLayout mErrorLayout;
+    @BindView(R.id.error_layout) LinearLayout mErrorLayout;
 
-    private TextView mErrorText;
+    @BindView(R.id.error_txt_cause) TextView mErrorText;
 
     private MovieFilter mCurrentFilter;
 
     private ActionBar mActionBar;
+
+    private Unbinder mUnbinder;
 
 
     // Implement MovieListFragment as a Singleton (although the default constructor cannot be private)
@@ -141,7 +147,6 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
         Log.i(TAG, "onCreateView invoked");
         String subTitle="";
 
-
         // initially assign the subtitle to Popular
         @SuppressWarnings("ConstantConditions") Resources resources = getContext().getResources();
         if (resources != null){
@@ -154,27 +159,14 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
         }
 
         View view = inflater.inflate(R.layout.movie_list_fragment, container, false);
+        mUnbinder = ButterKnife.bind(this, view);
 
-       // mActionBar=(Toolbar)view.findViewById(R.id.my_toolbar);
         //noinspection ConstantConditions
         mActionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
 
-       // ((AppCompatActivity)getActivity()).setSupportActionBar(mActionBar);
-
-        // FYI to change the main title https://stackoverflow.com/a/26506858/9128441
-        // ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Main Title");
-        //noinspection ConstantConditions
         mActionBar.setSubtitle(subTitle);
 
-        mMovieRecyclerView =  view.findViewById(R.id.movie_recycler_view);
-
         mMovieRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), NUMBER_COLUMNS));
-
-        mLoadingSpinner = view.findViewById(R.id.loading_spinner);
-
-        mErrorLayout = view.findViewById(R.id.error_layout);
-
-        mErrorText = view.findViewById(R.id.error_txt_cause);
 
         Button retryButton = view.findViewById(R.id.error_btn_retry);
 
@@ -185,14 +177,12 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
             }
         });
 
-
         setupMovieAdapter();
 
         // Can not start loading in onCreate because of the Progress Bar
         //   -- starting and stopping the spinner is problematic if the download is initiated
         //      in onCreate
         updateItems(true);
-
 
         return view;
 
@@ -288,6 +278,13 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
         }
 
         hideLoadingSpinner();
+    }
+
+
+    @Override
+    public void onDestroyView(){
+        super.onDestroyView();
+        mUnbinder.unbind();
     }
 
 
