@@ -4,24 +4,35 @@ package com.keyeswest.movies.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Movie implements Parcelable {
 
+    @SerializedName("original_title")
     private String mOriginalTitle;
 
+    @SerializedName("poster_path")
     private String mPosterPath;
 
+    @SerializedName("overview")
     private String mOverview;
 
+    @SerializedName("vote_average")
     private float mVoteAverage;
 
+    @SerializedName("release_date")
     private String mReleaseDate;
 
+    @SerializedName("title")
     private String mTitle;
 
+    @SerializedName("popularity")
     private float mPopularity;
 
+    @SerializedName("vote_count")
     private int mVoteCount;
 
+    @SerializedName("video")
     private Boolean mVideo;
 
     public static final Parcelable.Creator<Movie> CREATOR

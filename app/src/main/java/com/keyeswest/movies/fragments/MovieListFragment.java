@@ -136,9 +136,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
 
     @Override
     public void onDestroy(){
-        mMovieRecyclerView.clearOnScrollListeners();
         super.onDestroy();
-
     }
 
     @Override
@@ -355,6 +353,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
         mErrorLayout.setVisibility(View.GONE);
         mIsLoading = true;
         mLoadingSpinner.setVisibility(View.VISIBLE);
+
         if (firstPage){
             mMovieFetcher.fetchFirstPage(mCurrentFilter, this);
         }else{
