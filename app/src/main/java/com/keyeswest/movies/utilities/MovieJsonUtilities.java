@@ -6,6 +6,8 @@ import android.util.Log;
 import com.keyeswest.movies.interfaces.PageDataCallback;
 import com.keyeswest.movies.models.Movie;
 import com.keyeswest.movies.models.MovieDBMoviesResponse;
+import com.keyeswest.movies.models.MovieDBTrailersResponse;
+import com.keyeswest.movies.models.Trailer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,6 +19,19 @@ import java.util.List;
 public class MovieJsonUtilities {
 
     private static final String TAG = "MovieJsonUtilities";
+
+
+    public static List<Trailer> parseTrailerItemJson(String jsonString){
+        List<Trailer> trailerItems = new ArrayList<>();
+
+        if (jsonString == null){
+            return trailerItems;
+        }
+
+        trailerItems = MovieDBTrailersResponse.parseJSON(jsonString).getTrailers();
+        return trailerItems;
+
+    }
 
     public static List<Movie> parseMovieItemJson(String jsonString, PageDataCallback callback){
 

@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 public class Trailer {
 
     @SerializedName("id")
-    private int mId;
+    private String mId;
 
     @SerializedName("iso_639_1")
     private String mISO639;
@@ -30,11 +30,11 @@ public class Trailer {
     private String mType;
 
 
-    public int getId() {
+    public String getId() {
         return mId;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         mId = id;
     }
 

@@ -10,6 +10,17 @@ import java.util.List;
 
 public class MovieDBTrailersResponse {
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @SerializedName("id")
+    private int id;
+
     @SerializedName("results")
     private List<Trailer> mTrailers;
 

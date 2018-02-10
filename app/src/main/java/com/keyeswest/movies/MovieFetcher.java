@@ -7,8 +7,10 @@ import android.util.Log;
 import com.keyeswest.movies.fragments.MovieListFragment;
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
 import com.keyeswest.movies.interfaces.PageDataCallback;
+import com.keyeswest.movies.interfaces.TrailerFetcherCallback;
 import com.keyeswest.movies.models.Movie;
 import com.keyeswest.movies.tasks.FetchMovieDataTask;
+import com.keyeswest.movies.tasks.FetchTrailerDataTask;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -35,6 +37,8 @@ public class MovieFetcher implements PageDataCallback {
 
     private static final String POPULAR_ENDPOINT = "popular";
     private static final String TOP_RATED_ENDPOINT = "top_rated";
+
+    private static final String VIDEO_PATH = "videos";
 
     private MovieFetcherCallback mFetcherCallback;
 
@@ -71,6 +75,23 @@ public class MovieFetcher implements PageDataCallback {
 
     }
 
+    public static URL buildTrailerURL(int movieId){
+        URL url = null;
+
+        Uri uri = Uri.parse(MOVIE_DB_URL).buildUpon()
+                .appendPath(Integer.toString(movieId))
+                .appendPath(VIDEO_PATH)
+                .appendQueryParameter(API_KEY_PARAM, API_KEY)
+                .build();
+
+        try{
+            url = new URL(uri.toString());
+        }catch(MalformedURLException me){
+            me.printStackTrace();
+        }
+        return url;
+    }
+
     public MovieFetcher(Context context){
         mContext = context;
         mCurrentPage = 1;
@@ -91,7 +112,13 @@ public class MovieFetcher implements PageDataCallback {
     }
 
 
+    public void fetchMovieTrailers(int movieId, TrailerFetcherCallback callback){
 
+        URL trailerURL = buildTrailerURL(movieId);
+
+        new FetchTrailerDataTask(mContext, callback).execute(trailerURL);
+
+    }
 
     /** Initial request to an endpoint for Page 1 data
      *
