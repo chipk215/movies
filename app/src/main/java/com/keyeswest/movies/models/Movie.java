@@ -8,6 +8,10 @@ import com.google.gson.annotations.SerializedName;
 
 public class Movie implements Parcelable {
 
+
+    @SerializedName("id")
+    private int mId;
+
     @SerializedName("original_title")
     private String mOriginalTitle;
 
@@ -58,6 +62,7 @@ public class Movie implements Parcelable {
         mPopularity = in.readFloat();
         mVoteCount = in.readInt();
         mVideo = in.readByte() != 0;
+        mId = in.readInt();
 
     }
 
@@ -71,6 +76,7 @@ public class Movie implements Parcelable {
         mPopularity = 0f;
         mVoteCount = 0;
         mVideo = false;
+        mId=0;
 
     }
 
@@ -140,6 +146,14 @@ public class Movie implements Parcelable {
         mVideo = video;
     }
 
+    public int getId() {
+        return mId;
+    }
+
+    public void setId(int id) {
+        mId = id;
+    }
+
     @Override
     public String toString(){
         return mOriginalTitle + "\n\n";
@@ -162,6 +176,7 @@ public class Movie implements Parcelable {
         dest.writeFloat(mPopularity);
         dest.writeInt(mVoteCount);
         dest.writeByte((byte)(mVideo ? 1:0));
+        dest.writeInt(mId);
 
     }
 }

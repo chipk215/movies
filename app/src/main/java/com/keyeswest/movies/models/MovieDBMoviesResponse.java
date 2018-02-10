@@ -11,7 +11,7 @@ import java.util.List;
 public class MovieDBMoviesResponse {
 
     @SerializedName("results")
-    private List<Movie> movies;
+    private List<Movie> mMovies;
 
     public static MovieDBMoviesResponse parseJSON(String response){
         Gson gson = new GsonBuilder().create();
@@ -24,15 +24,15 @@ public class MovieDBMoviesResponse {
     }
 
     public MovieDBMoviesResponse(){
-        movies = new ArrayList<>();
+        mMovies = new ArrayList<>();
     }
 
 
     public List<Movie> getMovies() {
-        return movies;
+        return mMovies;
     }
 
     public void setMovies(List<Movie> movies) {
-        this.movies = movies;
+        this.mMovies = movies;
     }
 }

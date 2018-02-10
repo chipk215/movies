@@ -50,13 +50,10 @@ public class MovieFetcher implements PageDataCallback {
     private int mTotalPages;
 
 
-    // Ultimately we should proxy calls to MovieDB from a server or AWS lambda function and not
-    // have the api key in the app
-    // public for testing
     @SuppressWarnings("FieldCanBeLocal")
     private static final String API_KEY = BuildConfig.API_KEY;
 
-    private URL buildURL(int requestPageNumber){
+    private URL buildMoviesURL(int requestPageNumber){
 
         Uri uri = Uri.parse(MOVIE_DB_URL).buildUpon()
                 .appendPath(mEndpoint)
@@ -93,6 +90,9 @@ public class MovieFetcher implements PageDataCallback {
 
     }
 
+
+
+
     /** Initial request to an endpoint for Page 1 data
      *
      * @param filter identifies the endpoint (popular or top rated)
@@ -106,7 +106,7 @@ public class MovieFetcher implements PageDataCallback {
         int requestPageNumber = 1;
         setEndpoint(filter);
 
-        URL moviesURL = buildURL(requestPageNumber);
+        URL moviesURL = buildMoviesURL(requestPageNumber);
 
         new FetchMovieDataTask(mContext, mFetcherCallback, this).execute(moviesURL);
     }
@@ -123,7 +123,7 @@ public class MovieFetcher implements PageDataCallback {
         int nextPage = lastPageFetched + 1;
         if (nextPage <= mTotalPages){
             Log.i(TAG, "fetching page: "+ nextPage);
-            URL moviesURL = buildURL(nextPage);
+            URL moviesURL = buildMoviesURL(nextPage);
             new FetchMovieDataTask(mContext, mFetcherCallback,this).execute(moviesURL);
         }else {
 
