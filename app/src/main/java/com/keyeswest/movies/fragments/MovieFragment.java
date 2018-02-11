@@ -13,20 +13,24 @@ import android.widget.TextView;
 
 import com.keyeswest.movies.MovieFetcher;
 import com.keyeswest.movies.R;
+import com.keyeswest.movies.interfaces.TrailerFetcherCallback;
 import com.keyeswest.movies.models.Movie;
+import com.keyeswest.movies.models.Trailer;
 import com.squareup.picasso.Picasso;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
-public class MovieFragment extends Fragment {
+public class MovieFragment extends Fragment implements TrailerFetcherCallback {
     private static final String TAG = "MovieFragment";
     private static final String ARG_MOVIE = "movie_arg";
 
     private Movie mMovie;
+    private MovieFetcher mMovieFetcher;
 
     @BindView(R.id.title_tv)TextView mTitleTextView;
     @BindView(R.id.release_date_tv)TextView mReleaseDateTextView;
@@ -66,6 +70,8 @@ public class MovieFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
+        mMovieFetcher = new MovieFetcher(getContext());
+
         Bundle bundle = getArguments();
         if (bundle != null){
             mMovie = bundle.getParcelable(ARG_MOVIE);
@@ -101,6 +107,12 @@ public class MovieFragment extends Fragment {
 
         mSynopsisTextView.setText(mMovie.getOverview());
 
+        if (mMovie.getTrailers().isEmpty()){
+            // fetch trailers
+            mMovieFetcher.fetchMovieTrailers(mMovie.getId(), this);
+
+        }
+
         return view;
 
     }
@@ -109,5 +121,18 @@ public class MovieFragment extends Fragment {
     public void onDestroyView(){
         super.onDestroyView();
         mUnbinder.unbind();
+    }
+
+    @Override
+    public void updateTrailerList(List<Trailer> movieItemList) {
+        for (Trailer trailer : movieItemList){
+            Log.i(TAG,"Trailer title: " + trailer.getName());
+            mMovie.addTrailer(trailer);
+        }
+    }
+
+    @Override
+    public void downloadErrorOccurred(ErrorCondition errorMessage) {
+        Log.e(TAG,"Error fetching trailers: " + errorMessage);
     }
 }
