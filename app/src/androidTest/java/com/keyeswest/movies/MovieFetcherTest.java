@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+
+//TODO revisit and figure out how to implement this without using InstrumentationTestCase
 @RunWith(AndroidJUnit4.class)
 public class MovieFetcherTest extends InstrumentationTestCase {
 
