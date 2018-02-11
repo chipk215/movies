@@ -6,6 +6,9 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Movie implements Parcelable {
 
 
@@ -39,6 +42,8 @@ public class Movie implements Parcelable {
     @SerializedName("video")
     private Boolean mVideo;
 
+    private List<Trailer> mTrailers;
+
     public static final Parcelable.Creator<Movie> CREATOR
             = new Parcelable.Creator<Movie>() {
 
@@ -63,6 +68,8 @@ public class Movie implements Parcelable {
         mVoteCount = in.readInt();
         mVideo = in.readByte() != 0;
         mId = in.readInt();
+        mTrailers = new ArrayList<>();
+        in.readTypedList(mTrailers, Trailer.CREATOR);
 
     }
 
@@ -77,6 +84,7 @@ public class Movie implements Parcelable {
         mVoteCount = 0;
         mVideo = false;
         mId=0;
+        mTrailers = new ArrayList<>();
 
     }
 
@@ -138,6 +146,8 @@ public class Movie implements Parcelable {
         mPopularity = popularity;
     }
 
+    public int getVoteCount(){ return mVoteCount;}
+
     public void setVoteCount(int voteCount) {
         mVoteCount = voteCount;
     }
@@ -145,6 +155,8 @@ public class Movie implements Parcelable {
     public void setVideo(Boolean video) {
         mVideo = video;
     }
+
+    public boolean getVideo(){return mVideo;}
 
     public int getId() {
         return mId;
@@ -178,5 +190,13 @@ public class Movie implements Parcelable {
         dest.writeByte((byte)(mVideo ? 1:0));
         dest.writeInt(mId);
 
+    }
+
+    public List<Trailer> getTrailers() {
+        return mTrailers;
+    }
+
+    public void addTrailer(Trailer trailer){
+        mTrailers.add(trailer);
     }
 }

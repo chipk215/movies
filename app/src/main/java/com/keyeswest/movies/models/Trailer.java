@@ -1,9 +1,12 @@
 package com.keyeswest.movies.models;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
-public class Trailer {
+public class Trailer implements Parcelable {
 
     @SerializedName("id")
     private String mId;
@@ -28,6 +31,42 @@ public class Trailer {
 
     @SerializedName("type")
     private String mType;
+
+
+
+    public static final Parcelable.Creator<Trailer> CREATOR
+            = new Parcelable.Creator<Trailer>() {
+
+        public Trailer createFromParcel(Parcel in) {
+            return new Trailer(in);
+        }
+
+        public Trailer[] newArray(int size) {
+            return new Trailer[size];
+        }
+    };
+
+    public Trailer(){
+        mId="";
+        mISO639="";
+        mISO3166="";
+        mKey="";
+        mName="";
+        mSite="";
+        mSize=0;
+        mType="";
+    }
+
+    private Trailer(Parcel in){
+        mId = in.readString();
+        mISO639 = in.readString();
+        mISO3166 = in.readString();
+        mKey = in.readString();
+        mName = in.readString();
+        mSite = in.readString();
+        mSize = in.readInt();
+        mType = in.readString();
+    }
 
 
     public String getId() {
@@ -92,5 +131,22 @@ public class Trailer {
 
     public void setType(String type) {
         mType = type;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mId);
+        dest.writeString(mISO639);
+        dest.writeString(mISO3166);
+        dest.writeString(mKey);
+        dest.writeString(mName);
+        dest.writeString(mSite );
+        dest.writeInt(mSize);
+        dest.writeString(mType);
     }
 }
