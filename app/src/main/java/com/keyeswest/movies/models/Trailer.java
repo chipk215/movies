@@ -1,12 +1,16 @@
 package com.keyeswest.movies.models;
 
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
 public class Trailer implements Parcelable {
+
+    private static final String YOU_TUBE_WATCH_URL= "https://www.youtube.com/watch";
+    private static final String VIDEO_PARAMETER = "v";
 
     @SerializedName("id")
     private String mId;
@@ -148,5 +152,14 @@ public class Trailer implements Parcelable {
         dest.writeString(mSite );
         dest.writeInt(mSize);
         dest.writeString(mType);
+    }
+
+    public Uri getVideoUri(){
+        Uri uri = Uri.parse(YOU_TUBE_WATCH_URL).buildUpon()
+                .appendQueryParameter(VIDEO_PARAMETER, getKey())
+                .build();
+
+        return uri;
+
     }
 }

@@ -4,6 +4,7 @@ package com.keyeswest.movies.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -198,7 +199,12 @@ public class MovieFragment extends Fragment implements TrailerFetcherCallback {
             mTrailerRecyclerView.setAdapter(new TrailerAdapter(mTrailers, new TrailerAdapter.OnItemClickListener(){
                 @Override
                 public void onItemClick(Trailer trailer){
-                    Toast.makeText(getContext(),"Clicked", Toast.LENGTH_SHORT).show();
+
+                    Uri uri = trailer.getVideoUri();
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    if (intent.resolveActivity(getActivity().getPackageManager()) != null){
+                        startActivity(intent);
+                    }
                 }
             }));
         }
