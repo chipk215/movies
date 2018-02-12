@@ -8,7 +8,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 
-
+import com.keyeswest.movies.ErrorCondition;
 import com.keyeswest.movies.utilities.NetworkUtilities;
 
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class ListAsyncTask extends AsyncTask<URL, Void, String> {
 
 
     public interface ResultsCallback{
-        enum ErrorCondition {NETWORK_CONNECTIVITY, @SuppressWarnings("unused")DOWNLOAD_ERROR}
+        ErrorCondition errorCondition= ErrorCondition.NETWORK_CONNECTIVITY;
 
         void jsonResult(String jsonResult);
 
@@ -48,7 +48,7 @@ public class ListAsyncTask extends AsyncTask<URL, Void, String> {
                 (networkInfo.getType() != ConnectivityManager.TYPE_WIFI
                         && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
             // If no connectivity, cancel task and update Callback with null data.
-            mResultsCallback.downloadErrorOccurred(ResultsCallback.ErrorCondition.NETWORK_CONNECTIVITY);
+            mResultsCallback.downloadErrorOccurred(ResultsCallback.errorCondition.NETWORK_CONNECTIVITY);
             cancel(true);
         }
     }

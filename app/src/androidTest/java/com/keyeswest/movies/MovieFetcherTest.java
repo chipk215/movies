@@ -70,7 +70,7 @@ public class MovieFetcherTest extends InstrumentationTestCase {
                 fetcher.fetchMovieTrailers(198663,new TrailerFetcherCallback(){
 
                     @Override
-                    public void updateTrailerList(List<Trailer> movieItemList) {
+                    public void updateList(List<Trailer> movieItemList) {
                         int expectedCount = 2;
                         Assert.assertNotNull(movieItemList);
                         Assert.assertEquals(expectedCount,movieItemList.size());

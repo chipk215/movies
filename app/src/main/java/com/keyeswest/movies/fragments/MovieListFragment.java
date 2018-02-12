@@ -28,6 +28,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.keyeswest.movies.DetailMovieActivity;
+import com.keyeswest.movies.ErrorCondition;
 import com.keyeswest.movies.utilities.MovieFetcher;
 import com.keyeswest.movies.R;
 import com.keyeswest.movies.adapters.MovieAdapter;
@@ -44,7 +45,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 
-public class MovieListFragment extends Fragment implements MovieFetcherCallback {
+public class MovieListFragment extends Fragment implements MovieFetcherCallback<Movie> {
 
     private static final String TAG = "MovieListFragment";
     private static final int MOVIE_DETAIL = 1;
@@ -236,7 +237,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
      * @param movieItemList list of movies fetched from MovieDB site
      */
     @Override
-    public void updateMovieList(List<Movie> movieItemList) {
+    public void updateList(List<Movie> movieItemList) {
 
         if (mMovieRecyclerView.getVisibility() != View.VISIBLE){
             mMovieRecyclerView.setVisibility(View.VISIBLE);

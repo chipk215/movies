@@ -1,15 +1,15 @@
 package com.keyeswest.movies.interfaces;
 
 
+import com.keyeswest.movies.ErrorCondition;
 import com.keyeswest.movies.models.Movie;
 
 import java.util.List;
 
-public interface MovieFetcherCallback {
+public interface MovieFetcherCallback<T> {
 
-    enum ErrorCondition {NETWORK_CONNECTIVITY, @SuppressWarnings("unused")DOWNLOAD_ERROR}
-
-    void updateMovieList(List<Movie> movieItemList);
+    ErrorCondition errorCondition= ErrorCondition.NETWORK_CONNECTIVITY;
+    void updateList(List<T> itemList);
 
     void downloadErrorOccurred(ErrorCondition errorMessage);
 

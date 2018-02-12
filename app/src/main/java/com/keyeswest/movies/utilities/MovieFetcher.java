@@ -8,7 +8,7 @@ import com.keyeswest.movies.BuildConfig;
 import com.keyeswest.movies.fragments.MovieListFragment;
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
 import com.keyeswest.movies.interfaces.PageDataCallback;
-import com.keyeswest.movies.interfaces.TrailerFetcherCallback;
+
 import com.keyeswest.movies.models.Movie;
 
 import com.keyeswest.movies.tasks.ListAsyncTask;
@@ -115,7 +115,7 @@ public class MovieFetcher implements PageDataCallback {
     }
 
 
-    public void fetchMovieTrailers(int movieId, TrailerFetcherCallback callback){
+    public void fetchMovieTrailers(int movieId, MovieFetcherCallback callback){
 
         URL trailerURL = buildTrailerURL(movieId);
 
@@ -156,7 +156,7 @@ public class MovieFetcher implements PageDataCallback {
         }else {
 
             //return empty list if last page has been retrieved
-            mFetcherCallback.updateMovieList(new ArrayList<Movie>());
+            mFetcherCallback.updateList(new ArrayList<Movie>());
         }
     }
 

@@ -18,10 +18,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.keyeswest.movies.DetailMovieActivity;
+import com.keyeswest.movies.ErrorCondition;
+import com.keyeswest.movies.interfaces.MovieFetcherCallback;
 import com.keyeswest.movies.utilities.MovieFetcher;
 import com.keyeswest.movies.R;
 import com.keyeswest.movies.adapters.TrailerAdapter;
-import com.keyeswest.movies.interfaces.TrailerFetcherCallback;
+
 import com.keyeswest.movies.models.Movie;
 import com.keyeswest.movies.models.Trailer;
 import com.squareup.picasso.Picasso;
@@ -36,7 +38,7 @@ import butterknife.Unbinder;
 
 import static android.app.Activity.RESULT_OK;
 
-public class MovieFragment extends Fragment implements TrailerFetcherCallback {
+public class MovieFragment extends Fragment implements MovieFetcherCallback<Trailer> {
     private static final String TAG = "MovieFragment";
     private static final String ARG_MOVIE = "movie_arg";
 
@@ -160,7 +162,7 @@ public class MovieFragment extends Fragment implements TrailerFetcherCallback {
     }
 
     @Override
-    public void updateTrailerList(List<Trailer> trailers) {
+    public void updateList(List<Trailer> trailers) {
         for (Trailer trailer :trailers){
             Log.i(TAG,"Trailer title: " + trailer.getName());
             mMovie.addTrailer(trailer);

@@ -1,32 +1,24 @@
 package com.keyeswest.movies.utilities;
 
-
-import com.keyeswest.movies.interfaces.TrailerFetcherCallback;
+import com.keyeswest.movies.interfaces.MovieFetcherCallback;
 import com.keyeswest.movies.models.Trailer;
-import com.keyeswest.movies.tasks.ListAsyncTask;
 
 import java.util.List;
 
 
-public class TrailerResultsHandler implements ListAsyncTask.ResultsCallback{
+public class TrailerResultsHandler extends ResultsHandler{
 
 
-    TrailerFetcherCallback mTrailerCallback;
+    public TrailerResultsHandler(MovieFetcherCallback trailerCallback ){
 
-
-    public TrailerResultsHandler(TrailerFetcherCallback trailerCallback ){
-
-        mTrailerCallback = trailerCallback;
+        super(trailerCallback);
+        mCallback = trailerCallback;
     }
     @Override
     public void jsonResult(String jsonResult) {
         List<Trailer> trailers = MovieJsonUtilities.parseTrailerItemJson(jsonResult);
-        mTrailerCallback.updateTrailerList(trailers);
+        mCallback.updateList(trailers);
     }
 
-    @Override
-    public void downloadErrorOccurred(ErrorCondition errorMessage) {
-        mTrailerCallback.downloadErrorOccurred(TrailerFetcherCallback.ErrorCondition.NETWORK_CONNECTIVITY);
 
-    }
 }
