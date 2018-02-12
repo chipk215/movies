@@ -48,5 +48,6 @@
         android:clickable="true"
         android:src="@drawable/ic_play_icon"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:focusable="true"/>
 </android.support.constraint.ConstraintLayout>
