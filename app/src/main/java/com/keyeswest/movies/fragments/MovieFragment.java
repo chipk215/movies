@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.keyeswest.movies.DetailMovieActivity;
 import com.keyeswest.movies.MovieFetcher;
@@ -152,7 +153,6 @@ public class MovieFragment extends Fragment implements TrailerFetcherCallback {
 
 
 
-
     @Override
     public void onDestroyView(){
         super.onDestroyView();
@@ -167,7 +167,6 @@ public class MovieFragment extends Fragment implements TrailerFetcherCallback {
         }
 
         mTrailers.addAll(trailers);
-
 
 
         mTrailerRecyclerView.setVisibility(View.VISIBLE);
@@ -193,9 +192,15 @@ public class MovieFragment extends Fragment implements TrailerFetcherCallback {
     }
 
 
+
     private void setupTrailerAdapter(){
         if (isAdded()){
-            mTrailerRecyclerView.setAdapter(new TrailerAdapter(mTrailers, getActivity()));
+            mTrailerRecyclerView.setAdapter(new TrailerAdapter(mTrailers, new TrailerAdapter.OnItemClickListener(){
+                @Override
+                public void onItemClick(Trailer trailer){
+                    Toast.makeText(getContext(),"Clicked", Toast.LENGTH_SHORT).show();
+                }
+            }));
         }
     }
 }

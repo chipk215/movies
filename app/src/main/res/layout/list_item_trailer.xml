@@ -44,7 +44,8 @@
         android:layout_marginStart="4dp"
         android:layout_marginTop="8dp"
         android:contentDescription="@string/play"
-
+        android:background="@null"
+        android:clickable="true"
         android:src="@drawable/ic_play_icon"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

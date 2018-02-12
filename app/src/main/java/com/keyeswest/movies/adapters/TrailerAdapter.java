@@ -1,15 +1,15 @@
 package com.keyeswest.movies.adapters;
 
 
-import android.app.Activity;
+
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import com.keyeswest.movies.R;
 import com.keyeswest.movies.models.Trailer;
@@ -21,24 +21,30 @@ import butterknife.ButterKnife;
 
 public class TrailerAdapter  extends RecyclerView.Adapter<TrailerAdapter.TrailerHolder>  {
 
-    private final List<Trailer> mTrailerItems;
-    private final Activity mActivity;
+    public interface OnItemClickListener{
+        void onItemClick(Trailer trailer);
+    }
 
-    public TrailerAdapter(List<Trailer> trailerItems, Activity activity){
+    private final List<Trailer> mTrailerItems;
+    private final OnItemClickListener mListener;
+
+
+    public TrailerAdapter(List<Trailer> trailerItems, OnItemClickListener listener){
         mTrailerItems = trailerItems;
-        mActivity = activity;
+        mListener = listener;
+
     }
 
     @Override
     public TrailerHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(mActivity);
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         return new TrailerHolder(inflater, parent);
     }
 
     @Override
     public void onBindViewHolder(TrailerHolder holder, int position) {
-        holder.bind(mTrailerItems.get(position));
+        holder.bind(mTrailerItems.get(position), mListener);
 
     }
 
@@ -58,18 +64,19 @@ public class TrailerAdapter  extends RecyclerView.Adapter<TrailerAdapter.Trailer
 
         public TrailerHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.list_item_trailer, parent, false));
+            mPlayButton = new ImageButton(itemView.getContext());
             ButterKnife.bind(this, itemView);
 
         }
 
-        public void bind(final Trailer trailerItem){
+        public void bind(final Trailer trailerItem, final OnItemClickListener listener){
             mTitleTextView.setText(trailerItem.getName());
             mTypeTextView.setText(trailerItem.getType());
-            mPlayButton = new ImageButton(itemView.getContext());
+
             mPlayButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(v.getContext(),"Click", Toast.LENGTH_SHORT).show();
+                    listener.onItemClick(trailerItem);
                 }
             });
 
