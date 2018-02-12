@@ -8,6 +8,7 @@ import android.test.InstrumentationTestCase;
 
 import com.keyeswest.movies.interfaces.TrailerFetcherCallback;
 import com.keyeswest.movies.models.Trailer;
+import com.keyeswest.movies.utilities.MovieFetcher;
 
 import org.junit.Assert;
 import org.junit.Before;

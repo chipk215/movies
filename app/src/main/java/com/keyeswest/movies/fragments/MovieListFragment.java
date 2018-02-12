@@ -28,7 +28,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.keyeswest.movies.DetailMovieActivity;
-import com.keyeswest.movies.MovieFetcher;
+import com.keyeswest.movies.utilities.MovieFetcher;
 import com.keyeswest.movies.R;
 import com.keyeswest.movies.adapters.MovieAdapter;
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
@@ -377,7 +377,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
      *                  fetch the next page. The paging state data is maintained in in
      *                  MovieFetcher and includes the current endpoint (popular or top rated),
      *                  the last page of data fetched, and the callback to this fragment provided
-     *                  in fetchFirstPage.
+     *                  in fetchFirstMoviePage.
      */
     private void updateItems(Boolean firstPage){
 
@@ -386,9 +386,9 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
         mLoadingSpinner.setVisibility(View.VISIBLE);
 
         if (firstPage){
-            mMovieFetcher.fetchFirstPage(mCurrentFilter, this);
+            mMovieFetcher.fetchFirstMoviePage(mCurrentFilter, this);
         }else{
-            mMovieFetcher.fetchNextPage();
+            mMovieFetcher.fetchNextMoviePage();
         }
     }
 

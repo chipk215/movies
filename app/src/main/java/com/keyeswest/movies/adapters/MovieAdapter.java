@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.keyeswest.movies.MovieFetcher;
+import com.keyeswest.movies.utilities.MovieFetcher;
 import com.keyeswest.movies.R;
 
 import com.keyeswest.movies.models.Movie;

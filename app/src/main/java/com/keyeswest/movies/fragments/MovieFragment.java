@@ -16,10 +16,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.keyeswest.movies.DetailMovieActivity;
-import com.keyeswest.movies.MovieFetcher;
+import com.keyeswest.movies.utilities.MovieFetcher;
 import com.keyeswest.movies.R;
 import com.keyeswest.movies.adapters.TrailerAdapter;
 import com.keyeswest.movies.interfaces.TrailerFetcherCallback;

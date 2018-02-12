@@ -1,25 +1,22 @@
-package com.keyeswest.movies;
+package com.keyeswest.movies.utilities;
 
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
+import com.keyeswest.movies.BuildConfig;
 import com.keyeswest.movies.fragments.MovieListFragment;
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
 import com.keyeswest.movies.interfaces.PageDataCallback;
 import com.keyeswest.movies.interfaces.TrailerFetcherCallback;
 import com.keyeswest.movies.models.Movie;
-import com.keyeswest.movies.tasks.FetchMovieDataTask;
-import com.keyeswest.movies.tasks.FetchTrailerDataTask;
+
 import com.keyeswest.movies.tasks.ListAsyncTask;
-import com.keyeswest.movies.utilities.MovieJsonUtilities;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
-import static com.keyeswest.movies.utilities.MovieJsonUtilities.parseMovieItemJson;
 
 
 /**
@@ -122,37 +119,15 @@ public class MovieFetcher implements PageDataCallback {
 
         URL trailerURL = buildTrailerURL(movieId);
 
-        new FetchTrailerDataTask(mContext, callback).execute(trailerURL);
+        new ListAsyncTask(mContext,new TrailerResultsHandler(callback)).execute(trailerURL);
+
 
     }
 
-    public class MovieResultsHandler implements ListAsyncTask.ResultsCallback{
-
-        PageDataCallback mPageDataCallback;
-        MovieFetcherCallback mMovieCallback;
 
 
-        public MovieResultsHandler(MovieFetcherCallback movieCallback ,PageDataCallback pageCallback){
-            mPageDataCallback = pageCallback;
-            mMovieCallback = movieCallback;
-        }
-
-        @Override
-        public void jsonResult(String jsonResult) {
-            List<Movie> movies = MovieJsonUtilities.parseMovieItemJson(jsonResult, mPageDataCallback);
-            mMovieCallback.updateMovieList(movies);
-
-        }
-
-        @Override
-        public void downloadErrorOccurred(ErrorCondition errorMessage) {
-            mMovieCallback.downloadErrorOccurred(MovieFetcherCallback.ErrorCondition.NETWORK_CONNECTIVITY);
-        }
-    }
-
-
-    public void fetchFirstPage(MovieListFragment.MovieFilter filter, MovieFetcherCallback callback){
-        Log.i(TAG, "fetchFirstPage");
+    public void fetchFirstMoviePage(MovieListFragment.MovieFilter filter, MovieFetcherCallback callback){
+        Log.i(TAG, "fetchFirstMoviePage");
 
         mFetcherCallback = callback;
         int requestPageNumber = 1;
@@ -162,33 +137,15 @@ public class MovieFetcher implements PageDataCallback {
         new ListAsyncTask(mContext,new MovieResultsHandler(mFetcherCallback,this)).execute(moviesURL);
     }
 
-    /** Initial request to an endpoint for Page 1 data
-     *
-     * @param filter identifies the endpoint (popular or top rated)
-     * @param callback provides mechanism for passing results back to caller
 
-    public void fetchFirstPage(MovieListFragment.MovieFilter filter,
-                               MovieFetcherCallback callback){
-
-        Log.i(TAG, "fetchFirstPage");
-        mFetcherCallback = callback;
-        int requestPageNumber = 1;
-        setEndpoint(filter);
-
-        URL moviesURL = buildMoviesURL(requestPageNumber);
-
-
-        new FetchMovieDataTask(mContext, mFetcherCallback, this).execute(moviesURL);
-    }
-    */
 
     /**
      * Provides mechanism for fetching the next page of movie data from the endpoint established
-     * in fetchFirstPage. The page state data is kept in MovieFetcher.
+     * in fetchFirstMoviePage. The page state data is kept in MovieFetcher.
      */
-    public  void fetchNextPage(){
+    public  void fetchNextMoviePage(){
 
-        Log.i(TAG, "fetchNextPage");
+        Log.i(TAG, "fetchNextMoviePage");
 
         int lastPageFetched = mCurrentPage;
         int nextPage = lastPageFetched + 1;
