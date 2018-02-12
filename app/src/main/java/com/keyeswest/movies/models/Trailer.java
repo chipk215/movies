@@ -21,6 +21,7 @@ public class Trailer implements Parcelable {
     @SerializedName("iso_3166_1")
     private String mISO3166;
 
+    // This is a YouTube video key
     @SerializedName("key")
     private String mKey;
 
@@ -154,6 +155,11 @@ public class Trailer implements Parcelable {
         dest.writeString(mType);
     }
 
+    /**
+     * The video key returned by theMovieDP api is a YouTube key. To play the video a corresponding
+     * YouTube URI must be generated.
+     * @return the YouTube URI associated with the video
+     */
     public Uri getVideoUri(){
         Uri uri = Uri.parse(YOU_TUBE_WATCH_URL).buildUpon()
                 .appendQueryParameter(VIDEO_PARAMETER, getKey())

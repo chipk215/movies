@@ -193,18 +193,25 @@ public class MovieFragment extends Fragment implements TrailerFetcherCallback {
     }
 
 
+    private void playVideo(Trailer trailer){
+
+        Uri uri = trailer.getVideoUri();
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        if (intent.resolveActivity(getActivity().getPackageManager()) != null){
+            startActivity(intent);
+        }else{
+            //TODO inform user that video is not avialable
+        }
+
+    }
+
 
     private void setupTrailerAdapter(){
         if (isAdded()){
             mTrailerRecyclerView.setAdapter(new TrailerAdapter(mTrailers, new TrailerAdapter.OnItemClickListener(){
                 @Override
                 public void onItemClick(Trailer trailer){
-
-                    Uri uri = trailer.getVideoUri();
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    if (intent.resolveActivity(getActivity().getPackageManager()) != null){
-                        startActivity(intent);
-                    }
+                    playVideo(trailer);
                 }
             }));
         }
