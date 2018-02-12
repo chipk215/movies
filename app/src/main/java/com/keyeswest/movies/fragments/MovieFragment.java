@@ -145,7 +145,7 @@ public class MovieFragment extends Fragment implements TrailerFetcherCallback {
 
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        setupTrailerAdapter();
+
         return view;
 
     }
@@ -172,7 +172,7 @@ public class MovieFragment extends Fragment implements TrailerFetcherCallback {
 
         mTrailerRecyclerView.setVisibility(View.VISIBLE);
        //setMovieUpdateResult(mMovie);
-        mTrailerRecyclerView.getAdapter().notifyDataSetChanged();
+        setupTrailerAdapter();
 
     }
 
@@ -195,7 +195,7 @@ public class MovieFragment extends Fragment implements TrailerFetcherCallback {
 
     private void setupTrailerAdapter(){
         if (isAdded()){
-            mTrailerRecyclerView.setAdapter(new TrailerAdapter(mTrailers));
+            mTrailerRecyclerView.setAdapter(new TrailerAdapter(mTrailers, getActivity()));
         }
     }
 }

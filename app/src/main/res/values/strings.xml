@@ -18,5 +18,6 @@
     <string name="trailers">Movie Trailers</string>
 
 
-    <string name="play">Watch</string>
+    <string name="play">Play</string>
+    <string name="reviews">Reviews</string>
 </resources>

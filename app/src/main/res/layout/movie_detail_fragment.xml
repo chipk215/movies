@@ -12,6 +12,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/reviews"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/trailer_recycler_view" />
+
         <ImageView
             android:id="@+id/poster_iv"
             android:layout_width="194dp"
@@ -181,15 +195,14 @@
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/trailer_recycler_view"
-            android:layout_width="wrap_content"
-            android:layout_height="390dp"
-            android:layout_marginBottom="8dp"
+            android:layout_width="355dp"
+            android:layout_height="83dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView10"
-            app:layout_constraintVertical_bias="0.0"
             tools:context="com.keyeswest.movies.DetailMovieActivity" />
 
 
