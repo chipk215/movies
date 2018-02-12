@@ -15,4 +15,8 @@
     <string name="voter_average">Voter Average</string>
     <string name="popularity">Popularity</string>
     <string name="synopsis">Synopsis</string>
+    <string name="trailers">Movie Trailers</string>
+
+
+    <string name="play">Watch</string>
 </resources>

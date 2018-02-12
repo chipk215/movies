@@ -2,7 +2,9 @@ package com.keyeswest.movies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 
 import com.keyeswest.movies.fragments.MovieFragment;
 import com.keyeswest.movies.models.Movie;
@@ -10,12 +12,25 @@ import com.keyeswest.movies.models.Movie;
 
 public class DetailMovieActivity extends SingleFragmentActivity {
 
+    private static final String TAG = "DetailMovieActivity";
+
     private static final String EXTRA_MOVIE = "com.keyeswest.movies.movie";
 
     public static Intent newIntent(Context context, Movie movie){
         Intent intent = new Intent(context, DetailMovieActivity.class);
         intent.putExtra(EXTRA_MOVIE, movie);
         return intent;
+    }
+
+    public static Movie getMovie(Intent result){
+        Log.d(TAG, "getMovie invoked.");
+        if (result != null){
+            Movie movie = result.getParcelableExtra(EXTRA_MOVIE);
+            Log.d(TAG, "movie trailer count: " + movie.getTrailers().size());
+            return movie;
+        }
+
+        return null;
     }
 
     @Override
@@ -38,4 +53,6 @@ public class DetailMovieActivity extends SingleFragmentActivity {
         */
         return MovieFragment.newInstance(movie);
     }
+
+
 }

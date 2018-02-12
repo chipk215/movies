@@ -1,5 +1,6 @@
 package com.keyeswest.movies.fragments;
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -37,6 +38,7 @@ import com.keyeswest.movies.models.Movie;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -45,6 +47,7 @@ import butterknife.Unbinder;
 public class MovieListFragment extends Fragment implements MovieFetcherCallback {
 
     private static final String TAG = "MovieListFragment";
+    private static final int MOVIE_DETAIL = 1;
     private static final int NUMBER_COLUMNS = 3;
 
     private static final String SUB_TITLE_KEY = "subTitleKey";
@@ -279,6 +282,34 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
     }
 
 
+    /**
+     * TODO - this is not working the trailers are not being returned with the intent.
+     *        Tests and debug code show the intent is packaged with the trailer data
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        if (resultCode != Activity.RESULT_OK){
+            return;
+        }
+        if (requestCode == MOVIE_DETAIL){
+
+            if (data == null){
+                return;
+            }
+
+            Movie updatedMovie = DetailMovieActivity.getMovie(data);
+            Log.i(TAG, "Movie has trailers: "+ updatedMovie.getTrailers().size());
+
+            //TODO find corresponding movie in movie list and update
+
+
+        }
+    }
+
+
     @Override
     public void onDestroyView(){
         super.onDestroyView();
@@ -296,7 +327,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback 
                     Intent intent= DetailMovieActivity.newIntent(getContext(),movie);
 
                     try{
-                        startActivity(intent);
+                        startActivityForResult(intent, MOVIE_DETAIL);
 
                     }catch (ActivityNotFoundException anf){
                         Log.e(TAG, "Activity not found" + anf);

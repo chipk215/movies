@@ -1,7 +1,9 @@
 package com.keyeswest.movies;
 
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.keyeswest.movies.models.Movie;
@@ -99,6 +101,40 @@ public class MovieParcelableTest {
 
         Assert.assertTrue(movieOut.getTrailers().size()==2);
 
+
+    }
+
+    @Test
+    public void IntentWithMovieExtraTest(){
+
+        Trailer first = new Trailer();
+        first.setId("first");
+        first.setISO639("639");
+        first.setISO3166("3166");
+        first.setKey("key one");
+        first.setName("first name");
+        first.setSite("site one");
+        first.setSize(1);
+        first.setType("type one");
+
+        Trailer two = new Trailer();
+        two.setId("two");
+        two.setISO639("639_2");
+        two.setISO3166("3166_2");
+        two.setKey("key two");
+        two.setName("second name");
+        two.setSite("site two");
+        two.setSize(2);
+        two.setType("type two");
+
+        mMovieIn.addTrailer(first);
+        mMovieIn.addTrailer(two);
+
+        Intent intent = DetailMovieActivity.newIntent(InstrumentationRegistry.getTargetContext(), mMovieIn);
+        Movie movie = DetailMovieActivity.getMovie(intent);
+
+        Assert.assertNotNull(movie);
+        Assert.assertTrue(movie.getTrailers().size()==2);
 
     }
 
