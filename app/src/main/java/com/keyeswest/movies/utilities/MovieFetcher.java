@@ -48,13 +48,13 @@ public class MovieFetcher implements PageDataCallback {
     private final Context mContext;
 
     // Save the endpoint and page number for next page request
-    private String mEndpoint;
+    private String mMovieEndpoint;
 
     // The current page of data being fetched from MovieDB
-    private int mCurrentPage;
+    private int mCurrentMoviePage;
 
     // The total number of pages available for the endpoint
-    private int mTotalPages;
+    private int mTotalMoviePages;
 
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -63,7 +63,7 @@ public class MovieFetcher implements PageDataCallback {
     private URL buildMoviesURL(int requestPageNumber){
 
         Uri uri = Uri.parse(MOVIE_DB_URL).buildUpon()
-                .appendPath(mEndpoint)
+                .appendPath(mMovieEndpoint)
                 .appendQueryParameter(API_KEY_PARAM, API_KEY)
                 .appendQueryParameter(PAGE_PARAM, Integer.toString(requestPageNumber))
                 .build();
@@ -97,8 +97,8 @@ public class MovieFetcher implements PageDataCallback {
 
     public MovieFetcher(Context context){
         mContext = context;
-        mCurrentPage = 1;
-        mTotalPages = 1;
+        mCurrentMoviePage = 1;
+        mTotalMoviePages = 1;
     }
 
     public static String getPosterPathURL(String posterPath){
@@ -115,23 +115,30 @@ public class MovieFetcher implements PageDataCallback {
     }
 
 
+    /**
+     * Fetch Movie Trailers (theMovieDB API provides only 1 page of results)
+     * @param movieId - identifies the movie whose trailers are to be fetched
+     * @param callback - client callback with trailers
+     */
     public void fetchMovieTrailers(int movieId, MovieFetcherCallback callback){
 
         URL trailerURL = buildTrailerURL(movieId);
 
         new ListAsyncTask(mContext,new TrailerResultsHandler(callback)).execute(trailerURL);
-
-
     }
 
 
-
+    /**
+     * Fetch the first page of movie results from the endpoint specified by the filter.
+     * @param filter - determines which endpoint to use e.g. popular or top rated
+     * @param callback - client callback with movies
+     */
     public void fetchFirstMoviePage(MovieListFragment.MovieFilter filter, MovieFetcherCallback callback){
         Log.i(TAG, "fetchFirstMoviePage");
 
         mFetcherCallback = callback;
         int requestPageNumber = 1;
-        setEndpoint(filter);
+        setMovieEndpoint(filter);
 
         URL moviesURL = buildMoviesURL(requestPageNumber);
         new ListAsyncTask(mContext,new MovieResultsHandler(mFetcherCallback,this)).execute(moviesURL);
@@ -147,9 +154,9 @@ public class MovieFetcher implements PageDataCallback {
 
         Log.i(TAG, "fetchNextMoviePage");
 
-        int lastPageFetched = mCurrentPage;
+        int lastPageFetched = mCurrentMoviePage;
         int nextPage = lastPageFetched + 1;
-        if (nextPage <= mTotalPages){
+        if (nextPage <= mTotalMoviePages){
             Log.i(TAG, "fetching page: "+ nextPage);
             URL moviesURL = buildMoviesURL(nextPage);
             new ListAsyncTask(mContext,new MovieResultsHandler(mFetcherCallback,this)).execute(moviesURL);
@@ -161,19 +168,19 @@ public class MovieFetcher implements PageDataCallback {
     }
 
 
-    public void setTotalPages(int totalPages) {
-        mTotalPages = totalPages;
+    public void setTotalMoviePages(int totalMoviePages) {
+        mTotalMoviePages = totalMoviePages;
     }
 
-    public void setCurrentPage(int currentPage) {
-        mCurrentPage = currentPage;
+    public void setCurrentMoviePage(int currentMoviePage) {
+        mCurrentMoviePage = currentMoviePage;
     }
 
-    private void setEndpoint(MovieListFragment.MovieFilter filter){
+    private void setMovieEndpoint(MovieListFragment.MovieFilter filter){
         switch (filter){
-            case POPULAR: mEndpoint = POPULAR_ENDPOINT;
+            case POPULAR: mMovieEndpoint = POPULAR_ENDPOINT;
                 break;
-            case TOP_RATED: mEndpoint = TOP_RATED_ENDPOINT;
+            case TOP_RATED: mMovieEndpoint = TOP_RATED_ENDPOINT;
         }
     }
 

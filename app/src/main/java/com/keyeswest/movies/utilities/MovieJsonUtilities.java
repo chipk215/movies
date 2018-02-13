@@ -9,7 +9,6 @@ import com.keyeswest.movies.models.MovieDBMoviesResponse;
 import com.keyeswest.movies.models.MovieDBTrailersResponse;
 import com.keyeswest.movies.models.Trailer;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,12 +51,12 @@ public class MovieJsonUtilities {
 
             // Page of results containing data
             if (jsonObject.has(pageField)){
-                callback.setCurrentPage(jsonObject.optInt(pageField));
+                callback.setCurrentMoviePage(jsonObject.optInt(pageField));
             }
 
             //Get total pages for pagination
             if (jsonObject.has(totalPagesField)){
-                callback.setTotalPages(jsonObject.optInt(totalPagesField));
+                callback.setTotalMoviePages(jsonObject.optInt(totalPagesField));
             }
 
             if(jsonObject.has(resultsField)){
