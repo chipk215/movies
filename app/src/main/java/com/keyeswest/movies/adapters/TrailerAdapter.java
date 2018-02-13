@@ -1,7 +1,5 @@
 package com.keyeswest.movies.adapters;
 
-
-
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +7,6 @@ import android.view.ViewGroup;
 
 import android.widget.ImageButton;
 import android.widget.TextView;
-
 
 import com.keyeswest.movies.R;
 import com.keyeswest.movies.models.Trailer;
@@ -54,21 +51,19 @@ public class TrailerAdapter  extends RecyclerView.Adapter<TrailerAdapter.Trailer
     }
 
 
-
-
-    static class TrailerHolder  extends RecyclerView.ViewHolder{
+    class TrailerHolder  extends RecyclerView.ViewHolder{
 
         @BindView(R.id.title_tv) TextView mTitleTextView;
         @BindView(R.id.type_tv) TextView mTypeTextView;
         @BindView(R.id.trailer_btn) ImageButton mPlayButton;
 
-        public TrailerHolder(LayoutInflater inflater, ViewGroup parent) {
+        TrailerHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.list_item_trailer, parent, false));
             ButterKnife.bind(this, itemView);
 
         }
 
-        public void bind(final Trailer trailerItem, final OnItemClickListener listener){
+        void bind(final Trailer trailerItem, final OnItemClickListener listener){
             mTitleTextView.setText(trailerItem.getName());
             mTypeTextView.setText(trailerItem.getType());
 

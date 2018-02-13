@@ -17,11 +17,13 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import com.keyeswest.movies.DetailMovieActivity;
 import com.keyeswest.movies.ErrorCondition;
+import com.keyeswest.movies.adapters.ReviewAdapter;
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
+import com.keyeswest.movies.models.Review;
 import com.keyeswest.movies.utilities.MovieFetcher;
 import com.keyeswest.movies.R;
 import com.keyeswest.movies.adapters.TrailerAdapter;
@@ -40,7 +42,7 @@ import butterknife.Unbinder;
 
 import static android.app.Activity.RESULT_OK;
 
-public class MovieFragment extends Fragment implements MovieFetcherCallback<Trailer> {
+public class MovieFragment extends Fragment  {
     private static final String TAG = "MovieFragment";
     private static final String ARG_MOVIE = "movie_arg";
 
@@ -49,6 +51,7 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
     private boolean mMovieTrailersFetched;
 
     private List<Trailer> mTrailers;
+    private List<Review> mReviews;
 
     @BindView(R.id.title_tv)TextView mTitleTextView;
     @BindView(R.id.release_date_tv)TextView mReleaseDateTextView;
@@ -59,13 +62,53 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
     @BindView(R.id.trailer_show_btn) ImageButton mShowTrailerButton;
 
     @BindView(R.id.trailer_recycler_view) RecyclerView mTrailerRecyclerView;
+    @BindView(R.id.review_recycler_view) RecyclerView mReviewRecyclerView;
 
     private Unbinder mUnbinder;
-
 
     Context mContext;
     Activity mActivity;
 
+    private  class TrailerResults implements MovieFetcherCallback<Trailer>{
+        @Override
+        public void updateList(List<Trailer> trailers) {
+            for (Trailer trailer :trailers){
+                Log.i(TAG,"Trailer title: " + trailer.getName());
+                mMovie.addTrailer(trailer);
+            }
+
+            mTrailers.addAll(trailers);
+
+            mTrailerRecyclerView.getAdapter().notifyDataSetChanged();
+            // mTrailerRecyclerView.setVisibility(View.VISIBLE);
+            //setMovieUpdateResult(mMovie);
+            //  setupTrailerAdapter();
+
+        }
+
+        @Override
+        public void downloadErrorOccurred(ErrorCondition errorMessage) {
+            Log.e(TAG,"Error fetching trailers: " + errorMessage);
+        }
+    }
+
+
+    private class ReviewResults implements MovieFetcherCallback<Review>{
+
+        @Override
+        public void updateList(List<Review> itemList) {
+            Log.i(TAG, "Reviews");
+            mReviews.addAll(itemList);
+
+            mReviewRecyclerView.getAdapter().notifyItemInserted(mReviews.size()-1);
+
+        }
+
+        @Override
+        public void downloadErrorOccurred(ErrorCondition errorMessage) {
+
+        }
+    }
 
 
     /**
@@ -107,6 +150,7 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
         }
 
         mTrailers = new ArrayList<>();
+        mReviews = new ArrayList<>();
 
         mMovieTrailersFetched = false;
     }
@@ -139,9 +183,12 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
 
         mSynopsisTextView.setText(mMovie.getOverview());
 
-       // mMovieFetcher.fetchMovieTrailers(mMovie.getId(), this);
 
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        setupReviewAdapter();
+        mMovieFetcher.fetchFirstReviewPage(mMovie.getId(), new ReviewResults());
 
         hideTrailer();
 
@@ -181,7 +228,7 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
     }
 
     private void fetchMovieTrailers(){
-        mMovieFetcher.fetchMovieTrailers(mMovie.getId(), this);
+        mMovieFetcher.fetchMovieTrailers(mMovie.getId(), new TrailerResults());
     }
 
     @Override
@@ -190,26 +237,6 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
         mUnbinder.unbind();
     }
 
-    @Override
-    public void updateList(List<Trailer> trailers) {
-        for (Trailer trailer :trailers){
-            Log.i(TAG,"Trailer title: " + trailer.getName());
-            mMovie.addTrailer(trailer);
-        }
-
-        mTrailers.addAll(trailers);
-
-        mTrailerRecyclerView.getAdapter().notifyDataSetChanged();
-       // mTrailerRecyclerView.setVisibility(View.VISIBLE);
-       //setMovieUpdateResult(mMovie);
-      //  setupTrailerAdapter();
-
-    }
-
-    @Override
-    public void downloadErrorOccurred(ErrorCondition errorMessage) {
-        Log.e(TAG,"Error fetching trailers: " + errorMessage);
-    }
 
     private void setMovieUpdateResult(Movie movie){
         Log.i(TAG,"Invoking setMovieUpdateResult " + movie.getTrailers().size());
@@ -249,9 +276,16 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
     }
 
 
+    private void setupReviewAdapter(){
+        if (isAdded()){
+            mReviewRecyclerView.setAdapter(new ReviewAdapter(mReviews));
+        }
+    }
+
+
     private void hideTrailer(){
 
-        mTrailerRecyclerView.setVisibility(View.INVISIBLE);
+        mTrailerRecyclerView.setVisibility(View.GONE);
     }
 
     private void showTrailer(){
