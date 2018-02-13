@@ -14,8 +14,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.keyeswest.movies.DetailMovieActivity;
 import com.keyeswest.movies.ErrorCondition;
@@ -53,6 +55,7 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
     @BindView(R.id.popularity_tv)TextView mPopularityTextView;
     @BindView(R.id.poster_iv)ImageView mPosterImageView;
     @BindView(R.id.synopsis_tv)TextView mSynopsisTextView;
+    @BindView(R.id.trailer_show_btn) ImageButton mShowTrailerButton;
 
     @BindView(R.id.trailer_recycler_view) RecyclerView mTrailerRecyclerView;
 
@@ -138,16 +141,28 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
         mSynopsisTextView.setText(mMovie.getOverview());
 
         mMovieFetcher.fetchMovieTrailers(mMovie.getId(), this);
-/*
-        if (mMovie.getTrailers().isEmpty()){
-            // fetch trailers
-            mMovieFetcher.fetchMovieTrailers(mMovie.getId(), this);
-
-        }
-        */
 
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        mShowTrailerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Toast.makeText(getContext(),"Click", Toast.LENGTH_SHORT).show();
+                String show = getResources().getString(R.string.show).toString();
+                String hide = getResources().getString(R.string.hide).toString();
+                String tagString = (String)mShowTrailerButton.getTag();
+                if (tagString.equals(show)){
+                    mShowTrailerButton.setImageResource(R.drawable.ic_action_collapse);
+                    mShowTrailerButton.setTag(hide);
+
+                }else{
+                    mShowTrailerButton.setImageResource(R.drawable.ic_action_expand);
+                    mShowTrailerButton.setTag(show);
+
+                }
+
+            }
+        });
 
         return view;
 

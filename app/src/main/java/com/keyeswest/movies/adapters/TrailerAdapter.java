@@ -64,7 +64,6 @@ public class TrailerAdapter  extends RecyclerView.Adapter<TrailerAdapter.Trailer
 
         public TrailerHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.list_item_trailer, parent, false));
-            mPlayButton = new ImageButton(itemView.getContext());
             ButterKnife.bind(this, itemView);
 
         }
