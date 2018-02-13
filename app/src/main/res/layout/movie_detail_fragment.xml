@@ -179,16 +179,14 @@
             tools:text="Synopsis" />
 
         <TextView
-            android:id="@+id/textView10"
+            android:id="@+id/trailer_label_tv"
             android:layout_width="300dp"
             android:layout_height="27dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="2dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginTop="4dp"
             android:text="@string/trailers"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/trailer_show_btn"
             app:layout_constraintTop_toBottomOf="@+id/synopsis_tv"
             tools:text="Trailers Label" />
 
@@ -197,22 +195,24 @@
             android:layout_width="364dp"
             android:layout_height="116dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView10"
+            app:layout_constraintTop_toBottomOf="@+id/trailer_label_tv"
             tools:context="com.keyeswest.movies.DetailMovieActivity" />
 
         <ImageButton
             android:id="@+id/trailer_show_btn"
             android:layout_width="26dp"
             android:layout_height="27dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
-            android:contentDescription="@string/show"
             android:background="@null"
+            android:contentDescription="@string/show"
             android:tag="@string/show"
+            app:layout_constraintEnd_toStartOf="@+id/trailer_label_tv"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/synopsis_tv"
             app:srcCompat="@drawable/ic_action_expand" />

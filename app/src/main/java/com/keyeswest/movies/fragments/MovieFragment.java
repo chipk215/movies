@@ -46,6 +46,7 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
 
     private Movie mMovie;
     private MovieFetcher mMovieFetcher;
+    private boolean mMovieTrailersFetched;
 
     private List<Trailer> mTrailers;
 
@@ -102,14 +103,12 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
         }
         else{
             Log.e(TAG, "An expected movie object was not provided to initialize the fragment");
-            mMovie = new Movie();
+            // return
         }
 
         mTrailers = new ArrayList<>();
 
-
-
-
+        mMovieTrailersFetched = false;
     }
 
     @Override
@@ -140,9 +139,11 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
 
         mSynopsisTextView.setText(mMovie.getOverview());
 
-        mMovieFetcher.fetchMovieTrailers(mMovie.getId(), this);
+       // mMovieFetcher.fetchMovieTrailers(mMovie.getId(), this);
 
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        hideTrailer();
 
         mShowTrailerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -152,12 +153,23 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
                 String hide = getResources().getString(R.string.hide).toString();
                 String tagString = (String)mShowTrailerButton.getTag();
                 if (tagString.equals(show)){
+
                     mShowTrailerButton.setImageResource(R.drawable.ic_action_collapse);
                     mShowTrailerButton.setTag(hide);
+                    if (! mMovieTrailersFetched) {
+                        setupTrailerAdapter();
+                        fetchMovieTrailers();
+                        showTrailer();
+                        mMovieTrailersFetched = true;
+                    }else{
+                        showTrailer();
+                    }
+
 
                 }else{
                     mShowTrailerButton.setImageResource(R.drawable.ic_action_expand);
                     mShowTrailerButton.setTag(show);
+                    hideTrailer();
 
                 }
 
@@ -168,7 +180,9 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
 
     }
 
-
+    private void fetchMovieTrailers(){
+        mMovieFetcher.fetchMovieTrailers(mMovie.getId(), this);
+    }
 
     @Override
     public void onDestroyView(){
@@ -185,10 +199,10 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
 
         mTrailers.addAll(trailers);
 
-
-        mTrailerRecyclerView.setVisibility(View.VISIBLE);
+        mTrailerRecyclerView.getAdapter().notifyDataSetChanged();
+       // mTrailerRecyclerView.setVisibility(View.VISIBLE);
        //setMovieUpdateResult(mMovie);
-        setupTrailerAdapter();
+      //  setupTrailerAdapter();
 
     }
 
@@ -223,7 +237,8 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
 
 
     private void setupTrailerAdapter(){
-        if (isAdded()){
+        if (isAdded() && (mTrailerRecyclerView.getAdapter() == null)){
+
             mTrailerRecyclerView.setAdapter(new TrailerAdapter(mTrailers, new TrailerAdapter.OnItemClickListener(){
                 @Override
                 public void onItemClick(Trailer trailer){
@@ -231,5 +246,17 @@ public class MovieFragment extends Fragment implements MovieFetcherCallback<Trai
                 }
             }));
         }
+    }
+
+
+    private void hideTrailer(){
+
+        mTrailerRecyclerView.setVisibility(View.INVISIBLE);
+    }
+
+    private void showTrailer(){
+
+        mTrailerRecyclerView.setVisibility(View.VISIBLE);
+
     }
 }
