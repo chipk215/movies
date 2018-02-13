@@ -6,7 +6,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.InstrumentationTestCase;
 
-import com.keyeswest.movies.interfaces.TrailerFetcherCallback;
+import com.keyeswest.movies.interfaces.MovieFetcherCallback;
+import com.keyeswest.movies.models.Review;
 import com.keyeswest.movies.models.Trailer;
 import com.keyeswest.movies.utilities.MovieFetcher;
 
@@ -67,13 +68,52 @@ public class MovieFetcherTest extends InstrumentationTestCase {
             public void run() {
 
                 MovieFetcher fetcher = new MovieFetcher(InstrumentationRegistry.getTargetContext());
-                fetcher.fetchMovieTrailers(198663,new TrailerFetcherCallback(){
+                fetcher.fetchMovieTrailers(198663,new MovieFetcherCallback<Trailer>(){
 
                     @Override
                     public void updateList(List<Trailer> movieItemList) {
                         int expectedCount = 2;
                         Assert.assertNotNull(movieItemList);
                         Assert.assertEquals(expectedCount,movieItemList.size());
+                        signal.countDown();
+                    }
+
+                    @Override
+                    public void downloadErrorOccurred(ErrorCondition errorMessage) {
+                        Assert.fail();
+                    }
+                });
+            }
+        });
+
+
+        signal.await(30, TimeUnit.SECONDS);
+        Assert.assertTrue(true);
+    }
+
+
+    @Test
+    public void getReviewsTest() throws Throwable{
+
+        // create  a signal to let us know when our task is done.
+        signal = new CountDownLatch(1);
+
+        InstrumentationRegistry.getTargetContext().startActivity(new Intent(Intent.ACTION_MAIN));
+
+        // Execute the async task on the UI thread! THIS IS KEY!
+        runTestOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                MovieFetcher fetcher = new MovieFetcher(InstrumentationRegistry.getTargetContext());
+                fetcher.fetchFirstReviewPage(198663,new MovieFetcherCallback<Review>(){
+
+                    @Override
+                    public void updateList(List<Review> reviewItemList) {
+                        int expectedCount = 3;
+                        Assert.assertNotNull(reviewItemList);
+                        Assert.assertEquals(expectedCount,reviewItemList.size());
                         signal.countDown();
                     }
 

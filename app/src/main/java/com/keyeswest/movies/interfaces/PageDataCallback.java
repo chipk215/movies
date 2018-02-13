@@ -3,7 +3,7 @@ package com.keyeswest.movies.interfaces;
 
 public interface PageDataCallback {
 
-    void setCurrentMoviePage(int pageNumber);
+    void setCurrentPage(int pageNumber);
 
-    void setTotalMoviePages(int totalMoviePages);
+    void setTotalPages(int totalMoviePages);
 }

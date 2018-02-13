@@ -7,7 +7,6 @@ import android.util.Log;
 import com.keyeswest.movies.BuildConfig;
 import com.keyeswest.movies.fragments.MovieListFragment;
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
-import com.keyeswest.movies.interfaces.PageDataCallback;
 
 import com.keyeswest.movies.models.Movie;
 
@@ -26,7 +25,7 @@ import java.util.ArrayList;
  * lifetime of the caller. State data is held by MovieFetcher that is needed for fetching
  * paged data results.
  */
-public class MovieFetcher implements PageDataCallback {
+public class MovieFetcher  {
     private static final String TAG = MovieFetcher.class.getSimpleName();
 
     private static final String MOVIE_DB_URL=
@@ -41,8 +40,11 @@ public class MovieFetcher implements PageDataCallback {
     private static final String TOP_RATED_ENDPOINT = "top_rated";
 
     private static final String VIDEO_PATH = "videos";
+    private static final String REVIEW_PATH = "reviews";
 
-    private MovieFetcherCallback mFetcherCallback;
+    private MovieFetcherCallback mMoviesFetcherCallback;
+    private MovieFetcherCallback mReviewsFetcherCallback;
+
     private ListAsyncTask.ResultsCallback mResultsCallback;
 
     private final Context mContext;
@@ -50,11 +52,9 @@ public class MovieFetcher implements PageDataCallback {
     // Save the endpoint and page number for next page request
     private String mMovieEndpoint;
 
-    // The current page of data being fetched from MovieDB
-    private int mCurrentMoviePage;
 
-    // The total number of pages available for the endpoint
-    private int mTotalMoviePages;
+    private PageCounter mMoviePageCounter;
+    private PageCounter mReviewPageCounter;
 
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -78,6 +78,33 @@ public class MovieFetcher implements PageDataCallback {
 
     }
 
+
+    private URL buildReviewURL(int requestPageNumber, int movieId){
+        URL url = null;
+
+        Uri uri = Uri.parse(MOVIE_DB_URL).buildUpon()
+                .appendPath(Integer.toString(movieId))
+                .appendPath(REVIEW_PATH)
+                .appendQueryParameter(API_KEY_PARAM, API_KEY)
+                .build();
+
+        try{
+            url = new URL(uri.toString());
+        }catch(MalformedURLException me){
+            me.printStackTrace();
+        }
+
+        return url;
+
+    }
+
+    /**
+     * Constructs the URL for fetching movie trailers.
+     *
+     * public accessibility for unit testing
+     * @param movieId - movie ID to insert in URL
+     * @return themovieDB URL to fetch trailers
+     */
     public static URL buildTrailerURL(int movieId){
         URL url = null;
 
@@ -95,10 +122,9 @@ public class MovieFetcher implements PageDataCallback {
         return url;
     }
 
+
     public MovieFetcher(Context context){
         mContext = context;
-        mCurrentMoviePage = 1;
-        mTotalMoviePages = 1;
     }
 
     public static String getPosterPathURL(String posterPath){
@@ -114,7 +140,6 @@ public class MovieFetcher implements PageDataCallback {
 
     }
 
-
     /**
      * Fetch Movie Trailers (theMovieDB API provides only 1 page of results)
      * @param movieId - identifies the movie whose trailers are to be fetched
@@ -128,6 +153,7 @@ public class MovieFetcher implements PageDataCallback {
     }
 
 
+
     /**
      * Fetch the first page of movie results from the endpoint specified by the filter.
      * @param filter - determines which endpoint to use e.g. popular or top rated
@@ -136,12 +162,13 @@ public class MovieFetcher implements PageDataCallback {
     public void fetchFirstMoviePage(MovieListFragment.MovieFilter filter, MovieFetcherCallback callback){
         Log.i(TAG, "fetchFirstMoviePage");
 
-        mFetcherCallback = callback;
+        mMoviesFetcherCallback = callback;
         int requestPageNumber = 1;
         setMovieEndpoint(filter);
 
         URL moviesURL = buildMoviesURL(requestPageNumber);
-        new ListAsyncTask(mContext,new MovieResultsHandler(mFetcherCallback,this)).execute(moviesURL);
+        mMoviePageCounter = new PageCounter();
+        new ListAsyncTask(mContext,new MovieResultsHandler(mMoviesFetcherCallback,mMoviePageCounter)).execute(moviesURL);
     }
 
 
@@ -150,31 +177,61 @@ public class MovieFetcher implements PageDataCallback {
      * Provides mechanism for fetching the next page of movie data from the endpoint established
      * in fetchFirstMoviePage. The page state data is kept in MovieFetcher.
      */
-    public  void fetchNextMoviePage(){
+    public void fetchNextMoviePage(){
 
         Log.i(TAG, "fetchNextMoviePage");
 
-        int lastPageFetched = mCurrentMoviePage;
+       // int lastPageFetched = mCurrentMoviePage;
+        int lastPageFetched = mMoviePageCounter.getCurrentPageNumber();
         int nextPage = lastPageFetched + 1;
-        if (nextPage <= mTotalMoviePages){
+        if (nextPage <= mMoviePageCounter.getTotalPages()){
             Log.i(TAG, "fetching page: "+ nextPage);
             URL moviesURL = buildMoviesURL(nextPage);
-            new ListAsyncTask(mContext,new MovieResultsHandler(mFetcherCallback,this)).execute(moviesURL);
+            new ListAsyncTask(mContext,
+                    new MovieResultsHandler(mMoviesFetcherCallback,
+                            mMoviePageCounter)).execute(moviesURL);
         }else {
 
             //return empty list if last page has been retrieved
-            mFetcherCallback.updateList(new ArrayList<Movie>());
+            mMoviesFetcherCallback.updateList(new ArrayList<Movie>());
         }
     }
 
 
-    public void setTotalMoviePages(int totalMoviePages) {
-        mTotalMoviePages = totalMoviePages;
+    public void fetchFirstReviewPage(int movieId, MovieFetcherCallback callback){
+        Log.i(TAG, "fetchFirstReviewPage");
+        mReviewsFetcherCallback = callback;
+        int requestPageNumber = 1;
+        URL reviewsURL = buildReviewURL(requestPageNumber, movieId);
+        mReviewPageCounter = new PageCounter();
+
+        new ListAsyncTask(mContext,
+                new ReviewResultsHandler(mReviewsFetcherCallback,
+                        mReviewPageCounter)).execute(reviewsURL);
+
     }
 
-    public void setCurrentMoviePage(int currentMoviePage) {
-        mCurrentMoviePage = currentMoviePage;
+    public void fetchNextReviewPage(int movieId){
+        Log.i(TAG, "fetchNextReviewPage");
+
+        int lastPageFetched = mReviewPageCounter.getCurrentPageNumber();
+        int nextPage = lastPageFetched + 1;
+        if (nextPage <= mReviewPageCounter.getTotalPages()){
+            Log.i(TAG, "fetching review page: "+ nextPage);
+            URL reviewURL = buildReviewURL(nextPage, movieId);
+            new ListAsyncTask(mContext,
+                    new ReviewResultsHandler(mReviewsFetcherCallback,
+                            mReviewPageCounter)).execute(reviewURL);
+        }else {
+
+            //return empty list if last page has been retrieved
+            mMoviesFetcherCallback.updateList(new ArrayList<Movie>());
+        }
+
     }
+
+
+
 
     private void setMovieEndpoint(MovieListFragment.MovieFilter filter){
         switch (filter){

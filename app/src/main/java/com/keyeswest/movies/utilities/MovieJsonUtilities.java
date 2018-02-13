@@ -6,7 +6,9 @@ import android.util.Log;
 import com.keyeswest.movies.interfaces.PageDataCallback;
 import com.keyeswest.movies.models.Movie;
 import com.keyeswest.movies.models.MovieDBMoviesResponse;
+import com.keyeswest.movies.models.MovieDBReviewsResponse;
 import com.keyeswest.movies.models.MovieDBTrailersResponse;
+import com.keyeswest.movies.models.Review;
 import com.keyeswest.movies.models.Trailer;
 
 import org.json.JSONException;
@@ -51,12 +53,12 @@ public class MovieJsonUtilities {
 
             // Page of results containing data
             if (jsonObject.has(pageField)){
-                callback.setCurrentMoviePage(jsonObject.optInt(pageField));
+                callback.setCurrentPage(jsonObject.optInt(pageField));
             }
 
             //Get total pages for pagination
             if (jsonObject.has(totalPagesField)){
-                callback.setTotalMoviePages(jsonObject.optInt(totalPagesField));
+                callback.setTotalPages(jsonObject.optInt(totalPagesField));
             }
 
             if(jsonObject.has(resultsField)){
@@ -72,6 +74,22 @@ public class MovieJsonUtilities {
             return movieItems;
 
         }
+
+    }
+
+
+    public static List<Review> parseReviewItemJson(String jsonString, PageDataCallback callback){
+        List<Review> reviewItems = new ArrayList<>();
+
+        if (jsonString == null){
+            return reviewItems;
+        }
+
+        MovieDBReviewsResponse response = MovieDBReviewsResponse.parseJSON(jsonString);
+        callback.setTotalPages(response.getTotalPages());
+        callback.setCurrentPage(response.getPage());
+
+        return response.getReviews();
 
     }
 

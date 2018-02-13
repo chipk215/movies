@@ -1,17 +1,18 @@
 package com.keyeswest.movies.utilities;
 
+
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
 import com.keyeswest.movies.interfaces.PageDataCallback;
-import com.keyeswest.movies.models.Movie;
+
+import com.keyeswest.movies.models.Review;
 
 import java.util.List;
 
-public class MovieResultsHandler extends ResultsHandler{
+public class ReviewResultsHandler extends ResultsHandler {
 
     PageDataCallback mPageDataCallback;
 
-
-    public MovieResultsHandler(MovieFetcherCallback fetcherCallback ,PageDataCallback pageCallback){
+    public ReviewResultsHandler(MovieFetcherCallback fetcherCallback , PageDataCallback pageCallback){
         super(fetcherCallback);
         mPageDataCallback = pageCallback;
         mCallback = fetcherCallback;
@@ -19,10 +20,8 @@ public class MovieResultsHandler extends ResultsHandler{
 
     @Override
     public void jsonResult(String jsonResult) {
-        List<Movie> movies = MovieJsonUtilities.parseMovieItemJson(jsonResult, mPageDataCallback);
-        mCallback.updateList(movies);
+        List<Review> reviews = MovieJsonUtilities.parseReviewItemJson(jsonResult, mPageDataCallback);
+        mCallback.updateList(reviews);
 
     }
-
-
 }
