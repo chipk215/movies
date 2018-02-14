@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.keyeswest.movies.ErrorCondition;
@@ -69,6 +70,7 @@ public class MovieFragment extends Fragment  {
 
     @BindView(R.id.review_show_btn) ImageButton mShowReviewButton;
     @BindView(R.id.review_recycler_view) RecyclerView mReviewRecyclerView;
+    @BindView(R.id.loading_spinner) ProgressBar mLoadingSpinner;
 
     private Unbinder mUnbinder;
 
@@ -99,16 +101,18 @@ public class MovieFragment extends Fragment  {
 
         @Override
         public void updateList(List<Review> itemList) {
-            Log.i(TAG, "Reviews");
+            Log.i(TAG, "Updating Reviews");
             mReviews.addAll(itemList);
 
             mReviewRecyclerView.getAdapter().notifyItemInserted(mReviews.size()-1);
+          //  mLoadingSpinner.setVisibility(View.GONE);
 
         }
 
         @Override
         public void downloadErrorOccurred(ErrorCondition errorMessage) {
-
+            Log.e(TAG, "Download error occurred" + errorMessage);
+            mLoadingSpinner.setVisibility(View.GONE);
         }
     }
 
@@ -189,9 +193,11 @@ public class MovieFragment extends Fragment  {
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-
+        setupReviewAdapter();
         setupTrailerVisibility();
         setupReviewVisibility();
+
+
 
         return view;
 
@@ -200,21 +206,26 @@ public class MovieFragment extends Fragment  {
 
     private void setupReviewVisibility() {
         hideReview();
+
         mShowReviewButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
+                Log.d(TAG,"RV Button Clicked");
                 String tagString = (String) mShowReviewButton.getTag();
                 if (tagString.equals(mShow)) {
+                    Log.d(TAG,"RV Button tag is show moving to hide");
                     mShowReviewButton.setImageResource(R.drawable.ic_action_collapse);
                     mShowReviewButton.setTag(mHide);
                     showReview();
                     if (!mMovieReviewsFetched) {
-                        setupReviewAdapter();
-                        mMovieFetcher.fetchFirstReviewPage(mMovie.getId(), new ReviewResults());
                         mMovieReviewsFetched = true;
+                        mLoadingSpinner.setVisibility(View.VISIBLE);
+                        mMovieFetcher.fetchFirstReviewPage(mMovie.getId(), new ReviewResults());
+
                     }
                 }else {
+                    Log.d(TAG,"RV Button tag is hide moving to show");
                     mShowReviewButton.setImageResource(R.drawable.ic_action_expand);
                     mShowReviewButton.setTag(mShow);
                     hideReview();
