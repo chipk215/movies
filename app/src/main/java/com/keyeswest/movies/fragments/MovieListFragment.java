@@ -65,7 +65,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
     private MovieFetcher mMovieFetcher;
 
-    @BindView(R.id.loading_spinner) ProgressBar mLoadingSpinner;
+    @BindView(R.id.review_loading_spinner) ProgressBar mLoadingSpinner;
 
     @BindView(R.id.error_layout) LinearLayout mErrorLayout;
 

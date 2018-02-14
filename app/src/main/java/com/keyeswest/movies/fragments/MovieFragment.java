@@ -68,13 +68,15 @@ public class MovieFragment extends Fragment  {
     @BindView(R.id.synopsis_tv)TextView mSynopsisTextView;
 
 
+
     @BindView(R.id.trailer_show_btn) ImageButton mShowTrailerButton;
     @BindView(R.id.trailer_recycler_view) RecyclerView mTrailerRecyclerView;
     @BindView(R.id.no_trailer_tv)TextView mNoTrailersTextView;
+    @BindView(R.id.trailer_loading_spinner)ProgressBar mTrailerLoadingSpinner;
 
     @BindView(R.id.review_show_btn) ImageButton mShowReviewButton;
     @BindView(R.id.review_recycler_view) RecyclerView mReviewRecyclerView;
-    @BindView(R.id.loading_spinner) ProgressBar mLoadingSpinner;
+    @BindView(R.id.review_loading_spinner) ProgressBar mReviewLoadingSpinner;
     @BindView(R.id.no_review_tv) TextView mNoReviewsTextView;
 
     private View mRootView;
@@ -95,6 +97,7 @@ public class MovieFragment extends Fragment  {
         public void updateList(List<Trailer> trailers) {
 
             mTrailers.addAll(trailers);
+            mTrailerLoadingSpinner.setVisibility(View.GONE);
 
             // configure the UI depending upon whether there is any trailer data to display
             if (trailers.isEmpty()){
@@ -120,6 +123,7 @@ public class MovieFragment extends Fragment  {
         @Override
         public void downloadErrorOccurred(ErrorCondition errorMessage) {
             Log.e(TAG,"Error fetching trailers: " + errorMessage);
+            mTrailerLoadingSpinner.setVisibility(View.GONE);
         }
     }
 
@@ -136,7 +140,7 @@ public class MovieFragment extends Fragment  {
             Log.i(TAG, "Updating Reviews");
 
             mReviews.addAll(itemList);
-            mLoadingSpinner.setVisibility(View.GONE);
+            mReviewLoadingSpinner.setVisibility(View.GONE);
 
             // configure the UI depending upon whether there is any review data to display
             if (mReviews.isEmpty()){
@@ -162,7 +166,7 @@ public class MovieFragment extends Fragment  {
         @Override
         public void downloadErrorOccurred(ErrorCondition errorMessage) {
             Log.e(TAG, "Download error occurred" + errorMessage);
-            mLoadingSpinner.setVisibility(View.GONE);
+            mReviewLoadingSpinner.setVisibility(View.GONE);
         }
     }
 
@@ -290,7 +294,7 @@ public class MovieFragment extends Fragment  {
                         mMovieReviewsFetched = true;
 
                         // start the progress spinner
-                        mLoadingSpinner.setVisibility(View.VISIBLE);
+                        mReviewLoadingSpinner.setVisibility(View.VISIBLE);
 
                         // start the async fetcher
                         mMovieFetcher.fetchFirstReviewPage(mMovie.getId(), new ReviewResults());
@@ -331,6 +335,7 @@ public class MovieFragment extends Fragment  {
 
                     if (! mMovieTrailersFetched) {
                         mMovieTrailersFetched = true;
+                        mTrailerLoadingSpinner.setVisibility(View.VISIBLE);
                         mMovieFetcher.fetchMovieTrailers(mMovie.getId(), new TrailerResults());
 
                     }else{

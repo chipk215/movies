@@ -20,8 +20,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-
-
             <ImageView
                 android:id="@+id/poster_iv"
                 android:layout_width="198dp"
@@ -297,7 +295,14 @@
     </ScrollView>
 
     <ProgressBar
-        android:id="@+id/loading_spinner"
+        android:id="@+id/review_loading_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:visibility="gone" />
+
+    <ProgressBar
+        android:id="@+id/trailer_loading_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|center_vertical"
