@@ -25,4 +25,6 @@
 
     <string name="read_more">Read more on review website</string>
 
+    <string name="no_trailer">Movie has no trailers.</string>
+
 </resources>
