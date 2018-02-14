@@ -84,26 +84,37 @@ public class MovieFragment extends Fragment  {
     Context mContext;
     Activity mActivity;
 
+
+    /**
+     * Handles the trailer data fetched asynchronously from theMovieDB site.
+     * Implements the MovieFetcherCall interface to obtain trailer data or
+     * to handle errors that occurred during the fetch.
+     */
     private  class TrailerResults implements MovieFetcherCallback<Trailer>{
         @Override
         public void updateList(List<Trailer> trailers) {
 
             mTrailers.addAll(trailers);
+
+            // configure the UI depending upon whether there is any trailer data to display
             if (trailers.isEmpty()){
+
+                // no trailer data so display a no trailer message to the user
                 String message = mNoTrailersTextView.getText().toString();
                 message = mMovie.getTitle() + " " + message;
                 mNoTrailersTextView.setText(message);
+                // Show the no trailer message
                 mNoTrailersTextView.setVisibility(View.VISIBLE);
+
+                // Hide the trailer list view
                 mTrailerRecyclerView.setVisibility(View.GONE);
 
 
             }else{
-
+                // display the trailer data and notify the adapter there is no data
                 mTrailerRecyclerView.setVisibility(View.VISIBLE);
-                mTrailerRecyclerView.getAdapter().notifyDataSetChanged();
+                mTrailerRecyclerView.getAdapter().notifyItemInserted(mTrailers.size()-1);
             }
-
-
         }
 
         @Override
@@ -113,6 +124,11 @@ public class MovieFragment extends Fragment  {
     }
 
 
+    /**
+     * Handles the review data fetched asynchronously from theMovieDB site.
+     * Implements the MovieFetcherCall interface to obtain review data or
+     * to handle errors that occurred during the fetch.
+     */
     private class ReviewResults implements MovieFetcherCallback<Review>{
 
         @Override
@@ -122,19 +138,26 @@ public class MovieFragment extends Fragment  {
             mReviews.addAll(itemList);
             mLoadingSpinner.setVisibility(View.GONE);
 
+            // configure the UI depending upon whether there is any review data to display
             if (mReviews.isEmpty()){
+                // craft the no review message for the user
                 String message = mNoReviewsTextView.getText().toString();
                 message = mMovie.getTitle() + " " + message;
                 mNoReviewsTextView.setText(message);
                 mNoReviewsTextView.setVisibility(View.VISIBLE);
+                //hide the review list
                 mReviewRecyclerView.setVisibility(View.GONE);
 
             }else{
-
+                // update the list and show the trailer data to the user.
                 mReviewRecyclerView.getAdapter().notifyItemInserted(mReviews.size()-1);
+
+                // scroll the screen a bit to show trailer data in case all of the trailer items
+                // are off screeen
                 showReviewsWithNudge();
             }
         }
+
 
         @Override
         public void downloadErrorOccurred(ErrorCondition errorMessage) {
@@ -182,16 +205,21 @@ public class MovieFragment extends Fragment  {
             // return
         }
 
+        // data sources for the recycler list views
         mTrailers = new ArrayList<>();
         mReviews = new ArrayList<>();
 
+        // indicates whether the first page of trailers and reviews have been fetched
+        // helps with UI configuration
         mMovieTrailersFetched = false;
         mMovieReviewsFetched = false;
 
+        // cache these resource strings for easy reference
         mShow = getResources().getString(R.string.show);
         mHide =  getResources().getString(R.string.hide);
 
     }
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -233,30 +261,49 @@ public class MovieFragment extends Fragment  {
     }
 
 
+    /**
+     * Users can collapse or expand review data to unclutter the UI.
+     * This method implements the logic for hiding and showing Reviews based upon the user
+     * clicking the corresponding expand/collapse button on the screen.
+     */
     private void setupReviewVisibility() {
+        // ensure the review section is initially collapsed
         hideReview();
-
         mShowReviewButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                Log.d(TAG,"RV Button Clicked");
+
                 String tagString = (String) mShowReviewButton.getTag();
                 if (tagString.equals(mShow)) {
-                    Log.d(TAG,"RV Button tag is show moving to hide");
+                    // Show tag represents a collapsed view that should now be expanded
+
+                    // change the button icon to the collapse view state and toggle the tag
                     mShowReviewButton.setImageResource(R.drawable.ic_action_collapse);
                     mShowReviewButton.setTag(mHide);
 
                     if (!mMovieReviewsFetched) {
+                        // no reviews have been fetched yet
+
+                        // note: the list of reviews will not be made visible until it is determined
+                        // that there are reviews for the movie
                         mMovieReviewsFetched = true;
+
+                        // start the progress spinner
                         mLoadingSpinner.setVisibility(View.VISIBLE);
+
+                        // start the async fetcher
                         mMovieFetcher.fetchFirstReviewPage(mMovie.getId(), new ReviewResults());
 
                     }else{
+
+                        // the user has toggled the expand/collapse Review button so update the UI
                         showReview();
                     }
                 }else {
-                    Log.d(TAG,"RV Button tag is hide moving to show");
+
+                    // user is collapsing the review section
+                    // set up the button to expand the section
                     mShowReviewButton.setImageResource(R.drawable.ic_action_expand);
                     mShowReviewButton.setTag(mShow);
                     hideReview();
@@ -264,6 +311,8 @@ public class MovieFragment extends Fragment  {
             }
         });
     }
+
+
 
     private void setupTrailerVisibility(){
         hideTrailer();
@@ -314,7 +363,7 @@ public class MovieFragment extends Fragment  {
         if (intent.resolveActivity(getActivity().getPackageManager()) != null){
             startActivity(intent);
         }else{
-            //TODO inform user that video is not avialable
+            //TODO inform user that video is not available
         }
 
     }
@@ -370,9 +419,18 @@ public class MovieFragment extends Fragment  {
     }
 
 
+    /**
+     * The review section is at the bottom of a scrollable view. This method ensures the view is
+     * scrolled up a bit to show new review data that may have been added but is off screen and not
+     * visible to the user until they scroll.
+     *
+     * There probably is a better way to to handle this but this will do for now.
+     */
     private void showReviewsWithNudge(){
         mReviewRecyclerView.setVisibility(View.VISIBLE);
         final ScrollView sv = mRootView.findViewById(R.id.detail_sv);
+
+        // Attribution:  https://stackoverflow.com/a/6438136/9128441
         sv.post(new Runnable() {
             public void run() {
                 sv.scrollBy(0, NUDGE_VERTICAL_PIXELS);
