@@ -68,6 +68,7 @@ public class MovieFragment extends Fragment  {
 
     @BindView(R.id.trailer_show_btn) ImageButton mShowTrailerButton;
     @BindView(R.id.trailer_recycler_view) RecyclerView mTrailerRecyclerView;
+    @BindView(R.id.no_trailer_tv)TextView mNoTrailersTextView;
 
     @BindView(R.id.review_show_btn) ImageButton mShowReviewButton;
     @BindView(R.id.review_recycler_view) RecyclerView mReviewRecyclerView;
@@ -87,10 +88,21 @@ public class MovieFragment extends Fragment  {
                 Log.i(TAG,"Trailer title: " + trailer.getName());
                 mMovie.addTrailer(trailer);
             }
+            if (trailers.isEmpty()){
+                String message = mNoTrailersTextView.getText().toString();
+                message = mMovie.getTitle() + " " + message;
+                mNoTrailersTextView.setText(message);
+                mNoTrailersTextView.setVisibility(View.VISIBLE);
+                mTrailerRecyclerView.setVisibility(View.GONE);
 
-            mTrailers.addAll(trailers);
 
-            mTrailerRecyclerView.getAdapter().notifyDataSetChanged();
+            }else{
+                mTrailers.addAll(trailers);
+                mTrailerRecyclerView.setVisibility(View.VISIBLE);
+                mTrailerRecyclerView.getAdapter().notifyDataSetChanged();
+            }
+
+
         }
 
         @Override
@@ -258,13 +270,16 @@ public class MovieFragment extends Fragment  {
                 String tagString = (String)mShowTrailerButton.getTag();
                 if (tagString.equals(mShow)){
 
-                    mShowTrailerButton.setImageResource(R.drawable.ic_action_collapse);
                     mShowTrailerButton.setTag(mHide);
-                    showTrailer();
+                    mShowTrailerButton.setImageResource(R.drawable.ic_action_collapse);
+
                     if (! mMovieTrailersFetched) {
                         setupTrailerAdapter();
                         mMovieFetcher.fetchMovieTrailers(mMovie.getId(), new TrailerResults());
                         mMovieTrailersFetched = true;
+                    }else{
+                        showTrailer();
+
                     }
                 }else{
                     mShowTrailerButton.setImageResource(R.drawable.ic_action_expand);
@@ -320,14 +335,16 @@ public class MovieFragment extends Fragment  {
 
 
     private void hideTrailer(){
-
+        mNoTrailersTextView.setVisibility(View.GONE);
         mTrailerRecyclerView.setVisibility(View.GONE);
     }
 
     private void showTrailer(){
-
-        mTrailerRecyclerView.setVisibility(View.VISIBLE);
-
+        if (mTrailers.isEmpty()){
+            mNoTrailersTextView.setVisibility(View.VISIBLE);
+        }else {
+            mTrailerRecyclerView.setVisibility(View.VISIBLE);
+        }
 
     }
 
