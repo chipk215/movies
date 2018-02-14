@@ -91,7 +91,7 @@ public class MovieFragment extends Fragment  {
             mTrailers.addAll(trailers);
             if (trailers.isEmpty()){
                 String message = mNoTrailersTextView.getText().toString();
-                message = mMovie.getOriginalTitle() + " " + message;
+                message = mMovie.getTitle() + " " + message;
                 mNoTrailersTextView.setText(message);
                 mNoTrailersTextView.setVisibility(View.VISIBLE);
                 mTrailerRecyclerView.setVisibility(View.GONE);
@@ -124,7 +124,7 @@ public class MovieFragment extends Fragment  {
 
             if (mReviews.isEmpty()){
                 String message = mNoReviewsTextView.getText().toString();
-                message = mMovie.getOriginalTitle() + " " + message;
+                message = mMovie.getTitle() + " " + message;
                 mNoReviewsTextView.setText(message);
                 mNoReviewsTextView.setVisibility(View.VISIBLE);
                 mReviewRecyclerView.setVisibility(View.GONE);
@@ -203,7 +203,7 @@ public class MovieFragment extends Fragment  {
         View view = inflater.inflate(R.layout.movie_detail_fragment, container, false);
         mUnbinder = ButterKnife.bind(this, view);
 
-        mTitleTextView.setText(mMovie.getOriginalTitle());
+        mTitleTextView.setText(mMovie.getTitle());
 
         mReleaseDateTextView.setText(mMovie.getReleaseDate());
 
