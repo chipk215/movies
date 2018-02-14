@@ -45,6 +45,8 @@ public class MovieFragment extends Fragment  {
     private static final String TAG = "MovieFragment";
     private static final String ARG_MOVIE = "movie_arg";
 
+    private static final int NUDGE_VERTICAL_PIXELS = 200;
+
     private String mShow;
     private String mHide;
 
@@ -73,6 +75,7 @@ public class MovieFragment extends Fragment  {
     @BindView(R.id.review_show_btn) ImageButton mShowReviewButton;
     @BindView(R.id.review_recycler_view) RecyclerView mReviewRecyclerView;
     @BindView(R.id.loading_spinner) ProgressBar mLoadingSpinner;
+    @BindView(R.id.no_review_tv) TextView mNoReviewsTextView;
 
     private View mRootView;
 
@@ -84,10 +87,8 @@ public class MovieFragment extends Fragment  {
     private  class TrailerResults implements MovieFetcherCallback<Trailer>{
         @Override
         public void updateList(List<Trailer> trailers) {
-            for (Trailer trailer :trailers){
-                Log.i(TAG,"Trailer title: " + trailer.getName());
-                mMovie.addTrailer(trailer);
-            }
+
+            mTrailers.addAll(trailers);
             if (trailers.isEmpty()){
                 String message = mNoTrailersTextView.getText().toString();
                 message = mMovie.getOriginalTitle() + " " + message;
@@ -97,7 +98,7 @@ public class MovieFragment extends Fragment  {
 
 
             }else{
-                mTrailers.addAll(trailers);
+
                 mTrailerRecyclerView.setVisibility(View.VISIBLE);
                 mTrailerRecyclerView.getAdapter().notifyDataSetChanged();
             }
@@ -117,19 +118,22 @@ public class MovieFragment extends Fragment  {
         @Override
         public void updateList(List<Review> itemList) {
             Log.i(TAG, "Updating Reviews");
-            mReviews.addAll(itemList);
 
-            mReviewRecyclerView.getAdapter().notifyItemInserted(mReviews.size()-1);
+            mReviews.addAll(itemList);
             mLoadingSpinner.setVisibility(View.GONE);
 
-            final ScrollView sv = mRootView.findViewById(R.id.detail_sv);
-            sv.post(new Runnable() {
-                public void run() {
-                    sv.scrollBy(0,200);
-                }
-            });
+            if (mReviews.isEmpty()){
+                String message = mNoReviewsTextView.getText().toString();
+                message = mMovie.getOriginalTitle() + " " + message;
+                mNoReviewsTextView.setText(message);
+                mNoReviewsTextView.setVisibility(View.VISIBLE);
+                mReviewRecyclerView.setVisibility(View.GONE);
 
+            }else{
 
+                mReviewRecyclerView.getAdapter().notifyItemInserted(mReviews.size()-1);
+                showReviewsWithNudge();
+            }
         }
 
         @Override
@@ -217,6 +221,7 @@ public class MovieFragment extends Fragment  {
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        setupTrailerAdapter();
         setupReviewAdapter();
         setupTrailerVisibility();
         setupReviewVisibility();
@@ -241,12 +246,14 @@ public class MovieFragment extends Fragment  {
                     Log.d(TAG,"RV Button tag is show moving to hide");
                     mShowReviewButton.setImageResource(R.drawable.ic_action_collapse);
                     mShowReviewButton.setTag(mHide);
-                    showReview();
+
                     if (!mMovieReviewsFetched) {
                         mMovieReviewsFetched = true;
                         mLoadingSpinner.setVisibility(View.VISIBLE);
                         mMovieFetcher.fetchFirstReviewPage(mMovie.getId(), new ReviewResults());
 
+                    }else{
+                        showReview();
                     }
                 }else {
                     Log.d(TAG,"RV Button tag is hide moving to show");
@@ -265,21 +272,20 @@ public class MovieFragment extends Fragment  {
 
             @Override
             public void onClick(View v) {
-                //Toast.makeText(getContext(),"Click", Toast.LENGTH_SHORT).show();
 
                 String tagString = (String)mShowTrailerButton.getTag();
                 if (tagString.equals(mShow)){
 
-                    mShowTrailerButton.setTag(mHide);
                     mShowTrailerButton.setImageResource(R.drawable.ic_action_collapse);
+                    mShowTrailerButton.setTag(mHide);
+
 
                     if (! mMovieTrailersFetched) {
-                        setupTrailerAdapter();
-                        mMovieFetcher.fetchMovieTrailers(mMovie.getId(), new TrailerResults());
                         mMovieTrailersFetched = true;
+                        mMovieFetcher.fetchMovieTrailers(mMovie.getId(), new TrailerResults());
+
                     }else{
                         showTrailer();
-
                     }
                 }else{
                     mShowTrailerButton.setImageResource(R.drawable.ic_action_expand);
@@ -315,7 +321,7 @@ public class MovieFragment extends Fragment  {
 
 
     private void setupTrailerAdapter(){
-        if (isAdded() && (mTrailerRecyclerView.getAdapter() == null)){
+        if (isAdded()){
 
             mTrailerRecyclerView.setAdapter(new TrailerAdapter(mTrailers, new TrailerAdapter.OnItemClickListener(){
                 @Override
@@ -350,15 +356,28 @@ public class MovieFragment extends Fragment  {
 
     private void hideReview(){
         mReviewRecyclerView.setVisibility(View.GONE);
+        mNoReviewsTextView.setVisibility(View.GONE);
     }
 
     private void showReview(){
+
+        if (mReviews.isEmpty()){
+            mNoReviewsTextView.setVisibility(View.VISIBLE);
+
+        }else {
+            showReviewsWithNudge();
+        }
+    }
+
+
+    private void showReviewsWithNudge(){
         mReviewRecyclerView.setVisibility(View.VISIBLE);
         final ScrollView sv = mRootView.findViewById(R.id.detail_sv);
         sv.post(new Runnable() {
             public void run() {
-                sv.scrollBy(0,200);
+                sv.scrollBy(0, NUDGE_VERTICAL_PIXELS);
             }
         });
+
     }
 }
