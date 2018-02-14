@@ -54,7 +54,6 @@ public class TrailerAdapter  extends RecyclerView.Adapter<TrailerAdapter.Trailer
     class TrailerHolder  extends RecyclerView.ViewHolder{
 
         @BindView(R.id.title_tv) TextView mTitleTextView;
-        @BindView(R.id.type_tv) TextView mTypeTextView;
         @BindView(R.id.trailer_btn) ImageButton mPlayButton;
 
         TrailerHolder(LayoutInflater inflater, ViewGroup parent) {
@@ -65,7 +64,6 @@ public class TrailerAdapter  extends RecyclerView.Adapter<TrailerAdapter.Trailer
 
         void bind(final Trailer trailerItem, final OnItemClickListener listener){
             mTitleTextView.setText(trailerItem.getName());
-            mTypeTextView.setText(trailerItem.getType());
 
             mPlayButton.setOnClickListener(new View.OnClickListener() {
                 @Override

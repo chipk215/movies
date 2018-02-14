@@ -38,14 +38,14 @@
 
             <ImageView
                 android:id="@+id/poster_iv"
-                android:layout_width="194dp"
-                android:layout_height="208dp"
+                android:layout_width="198dp"
+                android:layout_height="227dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="2dp"
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/movie_poster"
-                android:scaleType="centerCrop"
+                android:scaleType="fitCenter"
                 app:layout_constraintBottom_toTopOf="@+id/guideline2"
                 app:layout_constraintEnd_toStartOf="@+id/guideline"
                 app:layout_constraintHorizontal_bias="1.0"
