@@ -10,6 +10,7 @@ import com.keyeswest.movies.interfaces.MovieFetcherCallback;
 
 import com.keyeswest.movies.models.Movie;
 
+import com.keyeswest.movies.models.Review;
 import com.keyeswest.movies.tasks.ListAsyncTask;
 
 import java.net.MalformedURLException;
@@ -225,7 +226,7 @@ public class MovieFetcher  {
         }else {
 
             //return empty list if last page has been retrieved
-            mMoviesFetcherCallback.updateList(new ArrayList<Movie>());
+            mReviewsFetcherCallback.updateList(new ArrayList<Review>());
         }
 
     }

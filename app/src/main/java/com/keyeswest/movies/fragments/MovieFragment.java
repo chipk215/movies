@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -78,6 +79,7 @@ public class MovieFragment extends Fragment  {
     @BindView(R.id.review_recycler_view) RecyclerView mReviewRecyclerView;
     @BindView(R.id.review_loading_spinner) ProgressBar mReviewLoadingSpinner;
     @BindView(R.id.no_review_tv) TextView mNoReviewsTextView;
+    boolean mReviewIsLoading;
 
     private View mRootView;
 
@@ -141,6 +143,7 @@ public class MovieFragment extends Fragment  {
 
             mReviews.addAll(itemList);
             mReviewLoadingSpinner.setVisibility(View.GONE);
+            mReviewIsLoading = false;
 
             // configure the UI depending upon whether there is any review data to display
             if (mReviews.isEmpty()){
@@ -153,12 +156,14 @@ public class MovieFragment extends Fragment  {
                 mReviewRecyclerView.setVisibility(View.GONE);
 
             }else{
-                // update the list and show the trailer data to the user.
-                mReviewRecyclerView.getAdapter().notifyItemInserted(mReviews.size()-1);
+                if (! itemList.isEmpty()) {
+                    // update the list and show the trailer data to the user.
+                    mReviewRecyclerView.getAdapter().notifyItemInserted(mReviews.size() - 1);
 
-                // scroll the screen a bit to show trailer data in case all of the trailer items
-                // are off screeen
-                showReviewsWithNudge();
+                    // scroll the screen a bit to show trailer data in case all of the trailer items
+                    // are off screen
+                    showReviewsWithNudge();
+                }
             }
         }
 
@@ -221,6 +226,8 @@ public class MovieFragment extends Fragment  {
         // cache these resource strings for easy reference
         mShow = getResources().getString(R.string.show);
         mHide =  getResources().getString(R.string.hide);
+
+        mReviewIsLoading = false;
 
     }
 
@@ -292,12 +299,7 @@ public class MovieFragment extends Fragment  {
                         // note: the list of reviews will not be made visible until it is determined
                         // that there are reviews for the movie
                         mMovieReviewsFetched = true;
-
-                        // start the progress spinner
-                        mReviewLoadingSpinner.setVisibility(View.VISIBLE);
-
-                        // start the async fetcher
-                        mMovieFetcher.fetchFirstReviewPage(mMovie.getId(), new ReviewResults());
+                        updateReviewItems(true);
 
                     }else{
 
@@ -388,11 +390,56 @@ public class MovieFragment extends Fragment  {
 
 
     private void setupReviewAdapter(){
+
         if (isAdded()){
             mReviewRecyclerView.setAdapter(new ReviewAdapter(mReviews));
+            mReviewRecyclerView.setItemAnimator(new DefaultItemAnimator());
+            mReviewRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+
+                    //current number of child views attached to the parent RecyclerView
+                    int visibleItemCount = layoutManager.getChildCount();
+                    Log.i(TAG,"visibleCount= " + visibleItemCount);
+
+                    //number of items in the adapter bound to the parent RecyclerView
+                    int totalItemCount = layoutManager.getItemCount();
+                    Log.i(TAG,"totalItemCount= " + totalItemCount);
+
+                    int firstVisibleItem = ((LinearLayoutManager)layoutManager).findFirstVisibleItemPosition();
+                    Log.i(TAG,"firstVisibleItem= " + firstVisibleItem);
+
+                    if ((totalItemCount - visibleItemCount) <= firstVisibleItem){
+                        Log.i(TAG, "Get next page...");
+
+                        if (!mReviewIsLoading){
+
+                            updateReviewItems(false);
+
+                        }
+                    }
+
+                }
+            });
+
         }
     }
 
+
+    private void updateReviewItems(Boolean firstPage){
+
+        mReviewIsLoading = true;
+        mReviewLoadingSpinner.setVisibility(View.VISIBLE);
+        if (firstPage){
+
+            mMovieFetcher.fetchFirstReviewPage(mMovie.getId(), new ReviewResults());
+
+        }else{
+            mMovieFetcher.fetchNextReviewPage(mMovie.getId());
+        }
+    }
 
     private void hideTrailer(){
         mNoTrailersTextView.setVisibility(View.GONE);
