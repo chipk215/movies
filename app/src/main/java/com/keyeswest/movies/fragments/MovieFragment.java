@@ -45,7 +45,7 @@ public class MovieFragment extends Fragment  {
     private static final String TAG = "MovieFragment";
     private static final String ARG_MOVIE = "movie_arg";
 
-    private static final int NUDGE_VERTICAL_PIXELS = 200;
+    private static final int NUDGE_VERTICAL_PIXELS = 400;
 
     private String mShow;
     private String mHide;
