@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
@@ -8,6 +10,7 @@
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/detail_sv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="com.keyeswest.movies.DetailMovieActivity">
@@ -22,11 +25,13 @@
                 android:id="@+id/textView4"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="24dp"
                 android:text="@string/reviews"
                 android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/review_recycler_view"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/review_show_btn"
                 app:layout_constraintTop_toBottomOf="@+id/trailer_recycler_view" />
@@ -188,10 +193,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="24dp"
                 android:text="@string/trailers"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/trailer_show_btn"
                 app:layout_constraintTop_toBottomOf="@+id/synopsis_tv"
                 tools:text="Trailers Label" />
@@ -205,13 +211,13 @@
                 android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/trailer_label_tv"
+                app:layout_constraintTop_toBottomOf="@+id/trailer_show_btn"
                 tools:context="com.keyeswest.movies.DetailMovieActivity" />
 
             <ImageButton
                 android:id="@+id/trailer_show_btn"
-                android:layout_width="26dp"
-                android:layout_height="27dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:background="@null"
@@ -223,8 +229,8 @@
 
             <ImageButton
                 android:id="@+id/review_show_btn"
-                android:layout_width="26dp"
-                android:layout_height="27dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:background="@null"

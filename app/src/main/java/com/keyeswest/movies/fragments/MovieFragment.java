@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.keyeswest.movies.ErrorCondition;
@@ -72,6 +73,8 @@ public class MovieFragment extends Fragment  {
     @BindView(R.id.review_recycler_view) RecyclerView mReviewRecyclerView;
     @BindView(R.id.loading_spinner) ProgressBar mLoadingSpinner;
 
+    private View mRootView;
+
     private Unbinder mUnbinder;
 
     Context mContext;
@@ -105,7 +108,15 @@ public class MovieFragment extends Fragment  {
             mReviews.addAll(itemList);
 
             mReviewRecyclerView.getAdapter().notifyItemInserted(mReviews.size()-1);
-          //  mLoadingSpinner.setVisibility(View.GONE);
+            mLoadingSpinner.setVisibility(View.GONE);
+
+            final ScrollView sv = mRootView.findViewById(R.id.detail_sv);
+            sv.post(new Runnable() {
+                public void run() {
+                    sv.scrollBy(0,200);
+                }
+            });
+
 
         }
 
@@ -163,6 +174,7 @@ public class MovieFragment extends Fragment  {
 
         mShow = getResources().getString(R.string.show);
         mHide =  getResources().getString(R.string.hide);
+
     }
 
     @Override
@@ -197,7 +209,7 @@ public class MovieFragment extends Fragment  {
         setupTrailerVisibility();
         setupReviewVisibility();
 
-
+        mRootView = view;
 
         return view;
 
@@ -316,6 +328,7 @@ public class MovieFragment extends Fragment  {
 
         mTrailerRecyclerView.setVisibility(View.VISIBLE);
 
+
     }
 
     private void hideReview(){
@@ -324,5 +337,11 @@ public class MovieFragment extends Fragment  {
 
     private void showReview(){
         mReviewRecyclerView.setVisibility(View.VISIBLE);
+        final ScrollView sv = mRootView.findViewById(R.id.detail_sv);
+        sv.post(new Runnable() {
+            public void run() {
+                sv.scrollBy(0,200);
+            }
+        });
     }
 }
