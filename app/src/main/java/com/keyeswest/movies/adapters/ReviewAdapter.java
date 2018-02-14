@@ -1,6 +1,7 @@
 package com.keyeswest.movies.adapters;
 
 
+import android.graphics.Paint;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -47,9 +48,12 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewHold
         @BindView(R.id.review_content_tv) TextView mContentTextView;
         @BindView(R.id.more_details_btn) Button mMoreDetailsButton;
 
+
         ReviewHolder(LayoutInflater inflater, ViewGroup parent){
             super(inflater.inflate(R.layout.list_item_review, parent, false));
+
             ButterKnife.bind(this, itemView);
+            mMoreDetailsButton.setPaintFlags(mMoreDetailsButton.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         }
 
         void bind(final Review reviewItem){

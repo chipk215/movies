@@ -18,8 +18,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-
-import com.keyeswest.movies.DetailMovieActivity;
 import com.keyeswest.movies.ErrorCondition;
 import com.keyeswest.movies.adapters.ReviewAdapter;
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
@@ -40,15 +38,20 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
-import static android.app.Activity.RESULT_OK;
 
 public class MovieFragment extends Fragment  {
     private static final String TAG = "MovieFragment";
     private static final String ARG_MOVIE = "movie_arg";
 
+    private String mShow;
+    private String mHide;
+
+
     private Movie mMovie;
     private MovieFetcher mMovieFetcher;
+
     private boolean mMovieTrailersFetched;
+    private boolean mMovieReviewsFetched;
 
     private List<Trailer> mTrailers;
     private List<Review> mReviews;
@@ -59,9 +62,12 @@ public class MovieFragment extends Fragment  {
     @BindView(R.id.popularity_tv)TextView mPopularityTextView;
     @BindView(R.id.poster_iv)ImageView mPosterImageView;
     @BindView(R.id.synopsis_tv)TextView mSynopsisTextView;
-    @BindView(R.id.trailer_show_btn) ImageButton mShowTrailerButton;
 
+
+    @BindView(R.id.trailer_show_btn) ImageButton mShowTrailerButton;
     @BindView(R.id.trailer_recycler_view) RecyclerView mTrailerRecyclerView;
+
+    @BindView(R.id.review_show_btn) ImageButton mShowReviewButton;
     @BindView(R.id.review_recycler_view) RecyclerView mReviewRecyclerView;
 
     private Unbinder mUnbinder;
@@ -80,10 +86,6 @@ public class MovieFragment extends Fragment  {
             mTrailers.addAll(trailers);
 
             mTrailerRecyclerView.getAdapter().notifyDataSetChanged();
-            // mTrailerRecyclerView.setVisibility(View.VISIBLE);
-            //setMovieUpdateResult(mMovie);
-            //  setupTrailerAdapter();
-
         }
 
         @Override
@@ -153,6 +155,10 @@ public class MovieFragment extends Fragment  {
         mReviews = new ArrayList<>();
 
         mMovieTrailersFetched = false;
+        mMovieReviewsFetched = false;
+
+        mShow = getResources().getString(R.string.show);
+        mHide =  getResources().getString(R.string.hide);
     }
 
     @Override
@@ -162,10 +168,8 @@ public class MovieFragment extends Fragment  {
         mContext = getContext();
         mActivity = getActivity();
 
-
         View view = inflater.inflate(R.layout.movie_detail_fragment, container, false);
         mUnbinder = ButterKnife.bind(this, view);
-
 
         mTitleTextView.setText(mMovie.getOriginalTitle());
 
@@ -177,59 +181,79 @@ public class MovieFragment extends Fragment  {
 
         mPopularityTextView.setText(decimalFormat.format(mMovie.getPopularity()));
 
-        //TODO research - does Picasso get the image from the cache or will the new context force a fetch?
         String imagePath = MovieFetcher.getPosterPathURL(mMovie.getPosterPath());
         Picasso.with(getContext()).load(imagePath).into(mPosterImageView);
 
         mSynopsisTextView.setText(mMovie.getOverview());
 
-
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        setupReviewAdapter();
-        mMovieFetcher.fetchFirstReviewPage(mMovie.getId(), new ReviewResults());
 
-        hideTrailer();
-
-        mShowTrailerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Toast.makeText(getContext(),"Click", Toast.LENGTH_SHORT).show();
-                String show = getResources().getString(R.string.show).toString();
-                String hide = getResources().getString(R.string.hide).toString();
-                String tagString = (String)mShowTrailerButton.getTag();
-                if (tagString.equals(show)){
-
-                    mShowTrailerButton.setImageResource(R.drawable.ic_action_collapse);
-                    mShowTrailerButton.setTag(hide);
-                    if (! mMovieTrailersFetched) {
-                        setupTrailerAdapter();
-                        fetchMovieTrailers();
-                        showTrailer();
-                        mMovieTrailersFetched = true;
-                    }else{
-                        showTrailer();
-                    }
-
-
-                }else{
-                    mShowTrailerButton.setImageResource(R.drawable.ic_action_expand);
-                    mShowTrailerButton.setTag(show);
-                    hideTrailer();
-
-                }
-
-            }
-        });
+        setupTrailerVisibility();
+        setupReviewVisibility();
 
         return view;
 
     }
 
-    private void fetchMovieTrailers(){
-        mMovieFetcher.fetchMovieTrailers(mMovie.getId(), new TrailerResults());
+
+    private void setupReviewVisibility() {
+        hideReview();
+        mShowReviewButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                String tagString = (String) mShowReviewButton.getTag();
+                if (tagString.equals(mShow)) {
+                    mShowReviewButton.setImageResource(R.drawable.ic_action_collapse);
+                    mShowReviewButton.setTag(mHide);
+                    showReview();
+                    if (!mMovieReviewsFetched) {
+                        setupReviewAdapter();
+                        mMovieFetcher.fetchFirstReviewPage(mMovie.getId(), new ReviewResults());
+                        mMovieReviewsFetched = true;
+                    }
+                }else {
+                    mShowReviewButton.setImageResource(R.drawable.ic_action_expand);
+                    mShowReviewButton.setTag(mShow);
+                    hideReview();
+                }
+            }
+        });
     }
+
+    private void setupTrailerVisibility(){
+        hideTrailer();
+
+        mShowTrailerButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                //Toast.makeText(getContext(),"Click", Toast.LENGTH_SHORT).show();
+
+                String tagString = (String)mShowTrailerButton.getTag();
+                if (tagString.equals(mShow)){
+
+                    mShowTrailerButton.setImageResource(R.drawable.ic_action_collapse);
+                    mShowTrailerButton.setTag(mHide);
+                    showTrailer();
+                    if (! mMovieTrailersFetched) {
+                        setupTrailerAdapter();
+                        mMovieFetcher.fetchMovieTrailers(mMovie.getId(), new TrailerResults());
+                        mMovieTrailersFetched = true;
+                    }
+                }else{
+                    mShowTrailerButton.setImageResource(R.drawable.ic_action_expand);
+                    mShowTrailerButton.setTag(mShow);
+                    hideTrailer();
+                }
+            }
+        });
+
+    }
+
+
 
     @Override
     public void onDestroyView(){
@@ -237,17 +261,6 @@ public class MovieFragment extends Fragment  {
         mUnbinder.unbind();
     }
 
-
-    private void setMovieUpdateResult(Movie movie){
-        Log.i(TAG,"Invoking setMovieUpdateResult " + movie.getTrailers().size());
-
-        Intent intent = DetailMovieActivity.newIntent(mContext, movie);
-        mActivity.setResult(RESULT_OK,intent);
-
-        Movie movieDebug  = DetailMovieActivity.getMovie(intent);
-        Log.d(TAG,"Debug Intent trailers equal:" + movieDebug.getTrailers().size());
-
-    }
 
 
     private void playVideo(Trailer trailer){
@@ -292,5 +305,13 @@ public class MovieFragment extends Fragment  {
 
         mTrailerRecyclerView.setVisibility(View.VISIBLE);
 
+    }
+
+    private void hideReview(){
+        mReviewRecyclerView.setVisibility(View.GONE);
+    }
+
+    private void showReview(){
+        mReviewRecyclerView.setVisibility(View.VISIBLE);
     }
 }
