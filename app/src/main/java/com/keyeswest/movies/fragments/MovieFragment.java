@@ -90,7 +90,7 @@ public class MovieFragment extends Fragment  {
             }
             if (trailers.isEmpty()){
                 String message = mNoTrailersTextView.getText().toString();
-                message = mMovie.getTitle() + " " + message;
+                message = mMovie.getOriginalTitle() + " " + message;
                 mNoTrailersTextView.setText(message);
                 mNoTrailersTextView.setVisibility(View.VISIBLE);
                 mTrailerRecyclerView.setVisibility(View.GONE);
