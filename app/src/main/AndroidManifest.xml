@@ -23,6 +23,13 @@
         <activity android:name=".DetailMovieActivity"
                   android:parentActivityName=".MovieListActivity">
         </activity>
+
+        <provider
+            android:authorities="com.keyeswest.movies"
+            android:name=".database.MovieContentProvider"
+            android:exported="false"
+            />
+
     </application>
 
 </manifest>

@@ -10,7 +10,7 @@ public class MovieBaseHelper extends SQLiteOpenHelper {
     private static final String DROP_TABLE = "DROP TABLE IF EXISTS ";
     private static final String CREATE_TABLE = "CREATE TABLE ";
 
-    private static final String DATABASE_NAME = "MovieBase.dp";
+    private static final String DATABASE_NAME = "MovieBase.db";
 
     private static final int DATABASE_VERSION = 1;
 
