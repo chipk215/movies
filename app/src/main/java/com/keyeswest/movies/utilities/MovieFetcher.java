@@ -80,11 +80,11 @@ public class MovieFetcher  {
     }
 
 
-    private URL buildReviewURL(int requestPageNumber, int movieId){
+    private URL buildReviewURL(int requestPageNumber, long movieId){
         URL url = null;
 
         Uri uri = Uri.parse(MOVIE_DB_URL).buildUpon()
-                .appendPath(Integer.toString(movieId))
+                .appendPath(Long.toString(movieId))
                 .appendPath(REVIEW_PATH)
                 .appendQueryParameter(API_KEY_PARAM, API_KEY)
                 .build();
@@ -106,11 +106,11 @@ public class MovieFetcher  {
      * @param movieId - movie ID to insert in URL
      * @return themovieDB URL to fetch trailers
      */
-    public static URL buildTrailerURL(int movieId){
+    public static URL buildTrailerURL(long movieId){
         URL url = null;
 
         Uri uri = Uri.parse(MOVIE_DB_URL).buildUpon()
-                .appendPath(Integer.toString(movieId))
+                .appendPath(Long.toString(movieId))
                 .appendPath(VIDEO_PATH)
                 .appendQueryParameter(API_KEY_PARAM, API_KEY)
                 .build();
@@ -146,7 +146,7 @@ public class MovieFetcher  {
      * @param movieId - identifies the movie whose trailers are to be fetched
      * @param callback - client callback with trailers
      */
-    public void fetchMovieTrailers(int movieId, MovieFetcherCallback callback){
+    public void fetchMovieTrailers(long movieId, MovieFetcherCallback callback){
 
         URL trailerURL = buildTrailerURL(movieId);
 
@@ -199,7 +199,7 @@ public class MovieFetcher  {
     }
 
 
-    public void fetchFirstReviewPage(int movieId, MovieFetcherCallback callback){
+    public void fetchFirstReviewPage(long movieId, MovieFetcherCallback callback){
         Log.i(TAG, "fetchFirstReviewPage");
         mReviewsFetcherCallback = callback;
         int requestPageNumber = 1;
@@ -212,7 +212,7 @@ public class MovieFetcher  {
 
     }
 
-    public void fetchNextReviewPage(int movieId){
+    public void fetchNextReviewPage(long movieId){
         Log.i(TAG, "fetchNextReviewPage");
 
         int lastPageFetched = mReviewPageCounter.getCurrentPageNumber();

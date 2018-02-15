@@ -13,7 +13,7 @@ public class Movie implements Parcelable {
 
 
     @SerializedName("id")
-    private int mId;
+    private long mId;
 
     @SerializedName("original_title")
     private String mOriginalTitle;
@@ -67,7 +67,7 @@ public class Movie implements Parcelable {
         mPopularity = in.readFloat();
         mVoteCount = in.readInt();
         mVideo = in.readByte() != 0;
-        mId = in.readInt();
+        mId = in.readLong();
         mTrailers = new ArrayList<>();
         in.readTypedList(mTrailers, Trailer.CREATOR);
 
@@ -158,7 +158,7 @@ public class Movie implements Parcelable {
 
     public boolean getVideo(){return mVideo;}
 
-    public int getId() {
+    public long getId() {
         return mId;
     }
 
@@ -188,7 +188,7 @@ public class Movie implements Parcelable {
         dest.writeFloat(mPopularity);
         dest.writeInt(mVoteCount);
         dest.writeByte((byte)(mVideo ? 1:0));
-        dest.writeInt(mId);
+        dest.writeLong(mId);
 
     }
 
