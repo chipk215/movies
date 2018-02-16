@@ -219,6 +219,8 @@ public class TestMovieContentProvider {
         String queryFailed = "Query failed to return a valid Cursor";
         assertTrue(queryFailed, movieCursor != null);
 
+        queryFailed = "\"Query failed to return the correct Cursor\";";
+        assertEquals(queryFailed,1, movieCursor.getCount());
 
         movieCursor.moveToFirst();
 
@@ -246,6 +248,95 @@ public class TestMovieContentProvider {
 
     }
 
+
+    //================================================================================
+    // Query for specific record in database
+    //================================================================================
+    @Test
+    public void testQueryForExistingRecord(){
+
+        // Get access to a writable database
+        MovieBaseHelper dbHelper = new MovieBaseHelper(mContext);
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+
+        // create a movie record
+        int testMovieId = 1;
+        /* Create movie to insert */
+        ContentValues testValues = createTestMovieRecord(testMovieId);
+
+        // insert the record directly into the database
+        long movieRowId = database.insert(
+                MovieContract.MovieTable.TABLE_NAME,
+                null,
+                testValues);
+
+        String insertFailed = "Unable to insert directly into the database";
+        Assert.assertTrue(insertFailed, movieRowId != -1);
+
+        database.close();
+
+        // request only the id field
+        String[] projection={
+                MovieContract.MovieTable.COLUMN_MOVIE_ID
+        };
+
+
+        String selectionClause = MovieContract.MovieTable.COLUMN_MOVIE_ID + "=  ?";
+        String[] selectionArgs = { Long.toString(testMovieId) };
+
+        Cursor movieCursor = mContext.getContentResolver().query(
+                MovieContract.MovieTable.CONTENT_URI,
+                /* Columns; leaving this null returns every column in the table */
+                projection,
+                /* Optional specification for columns in the "where" clause above */
+                selectionClause,
+                /* Values for "where" clause */
+                selectionArgs,
+                /* Sort order to return in Cursor */
+                null);
+
+        Assert.assertNotNull(movieCursor);
+        String failMessage = "Returned incorrect cursor";
+        Assert.assertEquals(failMessage, 1, movieCursor.getCount());
+        movieCursor.moveToFirst();
+        Assert.assertEquals(failMessage,testMovieId,  movieCursor.getLong(movieCursor
+                .getColumnIndex(MovieContract.MovieTable.COLUMN_MOVIE_ID)));
+
+
+        // verify that title was not returned from query (projection only requested ids)
+        Assert.assertEquals(failMessage, -1, movieCursor.getColumnIndex(MovieContract.MovieTable.COLUMN_TITLE));
+
+    }
+
+
+    //================================================================================
+    // Query for specific record not in database
+    //================================================================================
+    @Test
+    public void testQueryForNonExistingRecord(){
+        String[] projection={
+                MovieContract.MovieTable.COLUMN_MOVIE_ID
+        };
+
+        long testMovieId = 1;
+        String selectionClause = MovieContract.MovieTable.COLUMN_MOVIE_ID + "=  ?";
+        String[] selectionArgs = { Long.toString(testMovieId) };
+
+        Cursor movieCursor = mContext.getContentResolver().query(
+                MovieContract.MovieTable.CONTENT_URI,
+                /* Columns; leaving this null returns every column in the table */
+                projection,
+                /* Optional specification for columns in the "where" clause above */
+                selectionClause,
+                /* Values for "where" clause */
+                selectionArgs,
+                /* Sort order to return in Cursor */
+                null);
+
+        Assert.assertNotNull(movieCursor);
+        String failMessage = "Returned incorrect cursor";
+        Assert.assertEquals(failMessage, 0, movieCursor.getCount());
+    }
 
     //================================================================================
     // Test Delete (for a single item)

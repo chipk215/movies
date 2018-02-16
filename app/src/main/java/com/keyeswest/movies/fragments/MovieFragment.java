@@ -2,8 +2,10 @@ package com.keyeswest.movies.fragments;
 
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -25,6 +27,7 @@ import android.widget.Toast;
 
 import com.keyeswest.movies.ErrorCondition;
 import com.keyeswest.movies.adapters.ReviewAdapter;
+import com.keyeswest.movies.database.MovieContract;
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
 import com.keyeswest.movies.models.Review;
 import com.keyeswest.movies.utilities.MovieFetcher;
@@ -267,6 +270,8 @@ public class MovieFragment extends Fragment  {
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        setInitialFavoriteState();
+
         mFavoriteFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -296,6 +301,46 @@ public class MovieFragment extends Fragment  {
 
         return view;
 
+    }
+
+
+    private void setInitialFavoriteState(){
+
+        // Set as not a favorite
+        mFavoriteFab.setImageResource(R.drawable.ic_action_star_border);
+        mFavoriteFab.setTag(getResources().getString(R.string.border));
+
+        String[] projection={
+                MovieContract.MovieTable.COLUMN_MOVIE_ID
+        };
+
+        String selectionClause = MovieContract.MovieTable.COLUMN_MOVIE_ID + "=  ?";
+        String[] selectionArgs = { Long.toString(mMovie.getId()) };
+
+        Cursor movieCursor = mContext.getContentResolver().query(
+                MovieContract.MovieTable.CONTENT_URI,
+                /* Columns; leaving this null returns every column in the table */
+                projection,
+                /* Optional specification for columns in the "where" clause above */
+                selectionClause,
+                /* Values for "where" clause */
+                selectionArgs,
+                /* Sort order to return in Cursor */
+                null);
+
+        if ((movieCursor != null) && (movieCursor.getCount() == 1)) {
+
+                movieCursor.moveToFirst();
+                long movieId = movieCursor.getLong(movieCursor
+                        .getColumnIndex(MovieContract.MovieTable.COLUMN_MOVIE_ID));
+
+                if (mMovie.getId() == movieId){
+
+                    // set as favorite
+                    mFavoriteFab.setImageResource(R.drawable.ic_action_star);
+                    mFavoriteFab.setTag(getResources().getString(R.string.star));
+                }
+        }
     }
 
     private void showAToast(int resId){
