@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -176,8 +176,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/trailer_show_btn"
-                app:layout_constraintTop_toBottomOf="@+id/synopsis_tv"
-                />
+                app:layout_constraintTop_toBottomOf="@+id/synopsis_tv" />
 
             <ImageButton
                 android:id="@+id/trailer_show_btn"
@@ -292,6 +291,7 @@
         </android.support.constraint.ConstraintLayout>
 
 
+
     </ScrollView>
 
     <ProgressBar
@@ -308,4 +308,25 @@
         android:layout_gravity="center_horizontal|center_vertical"
         android:visibility="gone" />
 
-</FrameLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/favorite_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_action_star_border"
+        android:tag="@string/border"
+
+        app:backgroundTint="@android:color/holo_blue_dark"
+        app:borderWidth="0dp"
+        app:elevation="6dp"
+        app:fabSize="normal"
+        app:layout_anchor="@id/detail_sv"
+
+        app:layout_anchorGravity="bottom|right|end"
+        app:pressedTranslationZ="12dp" />
+
+
+
+</android.support.design.widget.CoordinatorLayout>

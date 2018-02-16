@@ -28,4 +28,10 @@
     <string name="no_trailer">has no trailers.</string>
     <string name="no_review">has no reviews.</string>
 
+    <string name="border">border</string>
+    <string name="star">star</string>
+    <string name="add_favorite">Added Favorite</string>
+    <string name="remove_favorite">Removed Favorite</string>
+
+
 </resources>

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.keyeswest.movies.ErrorCondition;
 import com.keyeswest.movies.adapters.ReviewAdapter;
@@ -61,13 +63,14 @@ public class MovieFragment extends Fragment  {
     private List<Trailer> mTrailers;
     private List<Review> mReviews;
 
+    private Toast mFavoriteToast;
+
     @BindView(R.id.title_tv)TextView mTitleTextView;
     @BindView(R.id.release_date_tv)TextView mReleaseDateTextView;
     @BindView(R.id.voter_average_tv)TextView mVoterAverageTextView;
     @BindView(R.id.popularity_tv)TextView mPopularityTextView;
     @BindView(R.id.poster_iv)ImageView mPosterImageView;
     @BindView(R.id.synopsis_tv)TextView mSynopsisTextView;
-
 
 
     @BindView(R.id.trailer_show_btn) ImageButton mShowTrailerButton;
@@ -79,6 +82,9 @@ public class MovieFragment extends Fragment  {
     @BindView(R.id.review_recycler_view) RecyclerView mReviewRecyclerView;
     @BindView(R.id.review_loading_spinner) ProgressBar mReviewLoadingSpinner;
     @BindView(R.id.no_review_tv) TextView mNoReviewsTextView;
+
+    @BindView(R.id.favorite_fab)FloatingActionButton mFavoriteFab;
+
     boolean mReviewIsLoading;
 
     private View mRootView;
@@ -239,6 +245,7 @@ public class MovieFragment extends Fragment  {
         mContext = getContext();
         mActivity = getActivity();
 
+
         View view = inflater.inflate(R.layout.movie_detail_fragment, container, false);
         mUnbinder = ButterKnife.bind(this, view);
 
@@ -260,6 +267,26 @@ public class MovieFragment extends Fragment  {
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        mFavoriteFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (mFavoriteFab.getTag().equals(getResources().getString(R.string.star))){
+
+                    showAToast(R.string.remove_favorite);
+
+                    mFavoriteFab.setImageResource(R.drawable.ic_action_star_border);
+                    mFavoriteFab.setTag(getResources().getString(R.string.border));
+                }else{
+
+                    showAToast(R.string.add_favorite);
+                    mFavoriteToast.show();
+                    mFavoriteFab.setImageResource(R.drawable.ic_action_star);
+                    mFavoriteFab.setTag(getResources().getString(R.string.star));
+                }
+            }
+        });
+
         setupTrailerAdapter();
         setupReviewAdapter();
         setupTrailerVisibility();
@@ -269,6 +296,14 @@ public class MovieFragment extends Fragment  {
 
         return view;
 
+    }
+
+    private void showAToast(int resId){
+        if (mFavoriteToast != null){
+            mFavoriteToast.cancel();
+        }
+        mFavoriteToast = Toast.makeText(mContext, resId, Toast.LENGTH_SHORT);
+        mFavoriteToast.show();
     }
 
 
