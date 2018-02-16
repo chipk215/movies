@@ -1,4 +1,4 @@
-package com.keyeswest.movies.database;
+package com.keyeswest.movies.data;
 
 
 import android.content.Context;

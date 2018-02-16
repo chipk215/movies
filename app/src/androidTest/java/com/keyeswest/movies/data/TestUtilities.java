@@ -15,14 +15,14 @@
 */
 
 
-package com.keyeswest.movies.database;
+package com.keyeswest.movies.data;
 
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 
-import com.keyeswest.movies.database.utils.PollingCheck;
+import com.keyeswest.movies.data.utils.PollingCheck;
 
 class TestUtilities {
 

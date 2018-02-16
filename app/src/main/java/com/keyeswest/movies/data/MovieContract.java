@@ -1,8 +1,7 @@
-package com.keyeswest.movies.database;
+package com.keyeswest.movies.data;
 
 
 import android.net.Uri;
-import android.provider.BaseColumns;
 
 /**
  * Defines the Movie entity for the MovieBase database

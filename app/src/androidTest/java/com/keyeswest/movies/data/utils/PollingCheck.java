@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-package com.keyeswest.movies.database.utils;
+package com.keyeswest.movies.data.utils;
 
 
 import junit.framework.Assert;

@@ -1,4 +1,4 @@
-package com.keyeswest.movies.database;
+package com.keyeswest.movies.data;
 
 
 import android.content.ContentProvider;
@@ -12,7 +12,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import static com.keyeswest.movies.database.MovieContract.MovieTable.TABLE_NAME;
+import static com.keyeswest.movies.data.MovieContract.MovieTable.TABLE_NAME;
 
 public class MovieContentProvider  extends ContentProvider{
 

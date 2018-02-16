@@ -2,7 +2,6 @@ package com.keyeswest.movies.fragments;
 
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -27,7 +26,7 @@ import android.widget.Toast;
 
 import com.keyeswest.movies.ErrorCondition;
 import com.keyeswest.movies.adapters.ReviewAdapter;
-import com.keyeswest.movies.database.MovieContract;
+import com.keyeswest.movies.data.MovieContract;
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
 import com.keyeswest.movies.models.Review;
 import com.keyeswest.movies.utilities.MovieFetcher;
