@@ -29,6 +29,7 @@ import com.keyeswest.movies.adapters.ReviewAdapter;
 import com.keyeswest.movies.data.MovieContract;
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
 import com.keyeswest.movies.models.Review;
+import com.keyeswest.movies.repos.MovieRepo;
 import com.keyeswest.movies.utilities.MovieFetcher;
 import com.keyeswest.movies.R;
 import com.keyeswest.movies.adapters.TrailerAdapter;
@@ -95,6 +96,8 @@ public class MovieFragment extends Fragment  {
 
     Context mContext;
     Activity mActivity;
+
+    private MovieRepo mMovieRepo;
 
 
     /**
@@ -213,6 +216,8 @@ public class MovieFragment extends Fragment  {
 
         mMovieFetcher = new MovieFetcher(getContext());
 
+        mMovieRepo = new MovieRepo(getContext());
+
         Bundle bundle = getArguments();
         if (bundle != null){
             mMovie = bundle.getParcelable(ARG_MOVIE);
@@ -269,7 +274,8 @@ public class MovieFragment extends Fragment  {
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        setInitialFavoriteState();
+      //  setInitialFavoriteState();
+        setInitialFavoriteButtonState();
 
         mFavoriteFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -284,6 +290,16 @@ public class MovieFragment extends Fragment  {
                 }else{
 
                     showAToast(R.string.add_favorite);
+                    mMovieRepo.addMovie(mMovie, new MovieRepo.AddMovieResult() {
+                        @Override
+                        public void movieResult(Uri movieUri) {
+                            if (movieUri != null) {
+                                Log.i(TAG, "Inserted movie into database" + movieUri.toString());
+                            }else{
+                                Log.i(TAG, "Failed to insert movie into database");
+                            }
+                        }
+                    });
                     mFavoriteToast.show();
                     mFavoriteFab.setImageResource(R.drawable.ic_action_star);
                     mFavoriteFab.setTag(getResources().getString(R.string.star));
@@ -302,6 +318,23 @@ public class MovieFragment extends Fragment  {
 
     }
 
+    private void setInitialFavoriteButtonState(){
+
+        // Set as not a favorite
+        mFavoriteFab.setImageResource(R.drawable.ic_action_star_border);
+        mFavoriteFab.setTag(getResources().getString(R.string.border));
+
+        mMovieRepo.getMovieById(mMovie.getId(), new MovieRepo.MovieResult() {
+            @Override
+            public void movieResult(List<Movie> movies) {
+                if ((movies.size() == 1) && (movies.get(0).getId() == mMovie.getId())){
+                    mFavoriteFab.setImageResource(R.drawable.ic_action_star);
+                    mFavoriteFab.setTag(getResources().getString(R.string.star));
+                }
+            }
+        });
+
+    }
 
     private void setInitialFavoriteState(){
 

@@ -14,6 +14,8 @@ import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.keyeswest.movies.models.Movie;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -204,7 +206,8 @@ public class TestMovieContentProvider {
         database.close();
 
         /* Perform the ContentProvider query */
-        Cursor movieCursor = mContext.getContentResolver().query(
+        ContentResolver resolver = mContext.getContentResolver();
+        Cursor movieCursor = resolver.query(
                 MovieContract.MovieTable.CONTENT_URI,
                 /* Columns; leaving this null returns every column in the table */
                 null,
@@ -216,34 +219,42 @@ public class TestMovieContentProvider {
                 null);
 
 
+
         String queryFailed = "Query failed to return a valid Cursor";
         assertTrue(queryFailed, movieCursor != null);
 
-        queryFailed = "\"Query failed to return the correct Cursor\";";
-        assertEquals(queryFailed,1, movieCursor.getCount());
 
-        movieCursor.moveToFirst();
+        // Test out the MovieWrapperCursor
+        MovieCursorWrapper cursor = new MovieCursorWrapper(movieCursor);
+
+        queryFailed = "\"Query failed to return the correct Cursor\";";
+        assertEquals(queryFailed,1, cursor.getCount());
+
+        cursor.moveToFirst();
+
+        Movie movie = cursor.getMovie();
 
         // Check the id
-        long actualId = movieCursor.getLong(movieCursor
-                .getColumnIndex(MovieContract.MovieTable.COLUMN_MOVIE_ID));
+      //  long actualId = movieCursor.getLong(movieCursor
+       //         .getColumnIndex(MovieContract.MovieTable.COLUMN_MOVIE_ID));
         String failId = "Movie ID data is incorrect.";
-        assertEquals(failId, (long)testMovieId, actualId);
+        assertEquals(failId, (long)testMovieId, movie.getId());
 
         // Check the title
-        String actualTitle =
-                movieCursor.getString(movieCursor
-                        .getColumnIndex(MovieContract.MovieTable.COLUMN_ORIGINAL_TITLE));
+      //  String actualTitle =
+       //         movieCursor.getString(movieCursor
+       //                 .getColumnIndex(MovieContract.MovieTable.COLUMN_ORIGINAL_TITLE));
         String failMessage = "Original Title data is incorrect.";
-        assertEquals(failMessage, ORIGINAL_TITLE, actualTitle);
+        assertEquals(failMessage, ORIGINAL_TITLE, movie.getOriginalTitle());
 
 
         //check the user rating
-        float actualRating = movieCursor.getFloat(movieCursor.
-                getColumnIndex(MovieContract.MovieTable.COLUMN_USER_RATING));
+       // float actualRating = movieCursor.getFloat(movieCursor.
+        //        getColumnIndex(MovieContract.MovieTable.COLUMN_USER_RATING));
         String failRating = "User rating is incorrect.";
-        assertEquals(failRating, USER_RATING, actualRating);
+        assertEquals(failRating, USER_RATING, movie.getVoteAverage());
         movieCursor.close();
+
 
 
     }

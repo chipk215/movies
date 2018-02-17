@@ -27,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.facebook.stetho.Stetho;
 import com.keyeswest.movies.DetailMovieActivity;
 import com.keyeswest.movies.ErrorCondition;
 import com.keyeswest.movies.utilities.MovieFetcher;
@@ -88,6 +89,8 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+
+        Stetho.initializeWithDefaults(getContext());
         Log.i(TAG, "MovieListFragment onCreate");
 
         // Notes (for the future):

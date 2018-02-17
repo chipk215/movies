@@ -24,6 +24,7 @@ public class Movie implements Parcelable {
     @SerializedName("overview")
     private String mOverview;
 
+    // This is also referred to in the requirements as user rating
     @SerializedName("vote_average")
     private float mVoteAverage;
 
@@ -74,6 +75,7 @@ public class Movie implements Parcelable {
     }
 
     public Movie(){
+        this(0L);
         mOriginalTitle = "";
         mPosterPath = "";
         mOverview = "";
@@ -83,9 +85,12 @@ public class Movie implements Parcelable {
         mPopularity = 0f;
         mVoteCount = 0;
         mVideo = false;
-        mId=0;
         mTrailers = new ArrayList<>();
 
+    }
+
+    public Movie(long movieId){
+        mId = movieId;
     }
 
 
