@@ -4,6 +4,7 @@ package com.keyeswest.movies.tasks;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,7 +15,11 @@ import com.keyeswest.movies.data.MovieCursorWrapper;
 import com.keyeswest.movies.models.Movie;
 import com.keyeswest.movies.repos.MovieRepo;
 import com.keyeswest.movies.repos.SqlResult;
+import com.keyeswest.movies.utilities.DatabaseBitmapUtility;
+import com.keyeswest.movies.utilities.MovieFetcher;
+import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,14 +58,9 @@ public class SqlTask extends AsyncTask<Bundle,Void,SqlResult> {
 
             switch (operation) {
                 case CREATE:
+
                     Movie movie = args.getParcelable(MOVIE_KEY);
-
-                    ContentValues values = new ContentValues();
-                    values.put(MovieContract.MovieTable.COLUMN_MOVIE_ID, movie.getId());
-                    values.put(MovieContract.MovieTable.COLUMN_ORIGINAL_TITLE, movie.getOriginalTitle());
-                    values.put(MovieContract.MovieTable.COLUMN_USER_RATING, movie.getVoteAverage());
-                    values.put(MovieContract.MovieTable.COLUMN_TITLE, movie.getTitle());
-
+                    ContentValues values = getContentValues(movie);
                     Uri uri = mContext.getContentResolver().insert(MovieContract.MovieTable.CONTENT_URI, values);
                     result.setResultUri(uri);
                     return result;
@@ -92,10 +92,8 @@ public class SqlTask extends AsyncTask<Bundle,Void,SqlResult> {
                         }
                     }
 
-
                     result.setMovies(movies);
                     return result;
-
 
                 case UPDATE:
 
@@ -173,5 +171,25 @@ public class SqlTask extends AsyncTask<Bundle,Void,SqlResult> {
 
     public void setDeleteResult(MovieRepo.DeleteResult deleteResult) {
         mDeleteResult = deleteResult;
+    }
+
+    private ContentValues getContentValues(Movie movie) throws IOException{
+
+        // Get the movie poster synchronously since we are off the UI thread
+        String posterPath = MovieFetcher.getPosterPathURL(movie.getPosterPath());
+        Bitmap posterImage = Picasso.with(mContext).load(posterPath).get();
+        byte[] posterBytes = DatabaseBitmapUtility.getBytes(posterImage);
+
+        ContentValues values = new ContentValues();
+        values.put(MovieContract.MovieTable.COLUMN_MOVIE_ID, movie.getId());
+        values.put(MovieContract.MovieTable.COLUMN_ORIGINAL_TITLE, movie.getOriginalTitle());
+        values.put(MovieContract.MovieTable.COLUMN_USER_RATING, movie.getVoteAverage());
+        values.put(MovieContract.MovieTable.COLUMN_TITLE, movie.getTitle());
+        values.put(MovieContract.MovieTable.COLUMN_POSTER, posterBytes);
+        values.put(MovieContract.MovieTable.COLUMN_RELEASE_DATE, movie.getReleaseDate());
+        values.put(MovieContract.MovieTable.COLUMN_SYNOPSIS, movie.getOverview());
+
+        return values;
+
     }
 }

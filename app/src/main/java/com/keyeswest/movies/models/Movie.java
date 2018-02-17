@@ -1,6 +1,7 @@
 package com.keyeswest.movies.models;
 
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -42,6 +43,8 @@ public class Movie implements Parcelable {
 
     @SerializedName("video")
     private Boolean mVideo;
+
+    private Bitmap mPosterImage;
 
     private List<Trailer> mTrailers;
 
@@ -204,4 +207,14 @@ public class Movie implements Parcelable {
     public void addTrailer(Trailer trailer){
         mTrailers.add(trailer);
     }
+
+    public Bitmap getPosterImage() {
+        return mPosterImage;
+    }
+
+    public void setPosterImage(Bitmap posterImage) {
+        mPosterImage = posterImage;
+    }
+
+
 }

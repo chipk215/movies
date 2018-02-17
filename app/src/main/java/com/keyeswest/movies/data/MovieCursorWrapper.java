@@ -3,8 +3,10 @@ package com.keyeswest.movies.data;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;
+import android.graphics.Bitmap;
 
 import com.keyeswest.movies.models.Movie;
+import com.keyeswest.movies.utilities.DatabaseBitmapUtility;
 
 public class MovieCursorWrapper extends CursorWrapper {
 
@@ -18,7 +20,9 @@ public class MovieCursorWrapper extends CursorWrapper {
         String originalTitle = getString(getColumnIndex(MovieContract.MovieTable.COLUMN_ORIGINAL_TITLE));
         String title = getString(getColumnIndex(MovieContract.MovieTable.COLUMN_TITLE));
 
-        //revisit poster after learning how to deal with blobs
+
+        Bitmap posterImage = DatabaseBitmapUtility.getImage(
+                getBlob(getColumnIndex(MovieContract.MovieTable.COLUMN_POSTER)));
 
         String synopsis = getString(getColumnIndex(MovieContract.MovieTable.COLUMN_SYNOPSIS));
         float userRating = getFloat(getColumnIndex(MovieContract.MovieTable.COLUMN_USER_RATING));
@@ -30,6 +34,7 @@ public class MovieCursorWrapper extends CursorWrapper {
         movie.setOverview(synopsis);
         movie.setVoteAverage(userRating);
         movie.setReleaseDate(releaseDate);
+        movie.setPosterImage(posterImage);
 
         return movie;
     }

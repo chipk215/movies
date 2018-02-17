@@ -290,12 +290,13 @@ public class MovieFragment extends Fragment  {
                                 return;
                             }
                             mFavoriteFab.setEnabled(true);
+                            mFavoriteFab.setImageResource(R.drawable.ic_action_star_border);
+                            mFavoriteFab.setTag(getResources().getString(R.string.border));
 
                         }
                     });
 
-                    mFavoriteFab.setImageResource(R.drawable.ic_action_star_border);
-                    mFavoriteFab.setTag(getResources().getString(R.string.border));
+
                 }else{
 
                     showAToast(R.string.add_favorite);
@@ -306,15 +307,15 @@ public class MovieFragment extends Fragment  {
                             if (movieUri != null) {
                                 Log.i(TAG, "Inserted movie into database" + movieUri.toString());
                                 mFavoriteFab.setEnabled(true);
+                                mFavoriteFab.setImageResource(R.drawable.ic_action_star);
+                                mFavoriteFab.setTag(getResources().getString(R.string.star));
                             }else{
                                 Log.i(TAG, "Failed to insert movie into database");
+
                             }
 
                         }
                     });
-                    mFavoriteToast.show();
-                    mFavoriteFab.setImageResource(R.drawable.ic_action_star);
-                    mFavoriteFab.setTag(getResources().getString(R.string.star));
                 }
             }
         });
