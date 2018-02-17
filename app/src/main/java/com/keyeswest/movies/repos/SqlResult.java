@@ -17,7 +17,6 @@ public class SqlResult {
 
     private MovieRepo.Operations mSqlOperation;
 
-
     public SqlResult(){}
 
     public List<Movie> getMovies() {

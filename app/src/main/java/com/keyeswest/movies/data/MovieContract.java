@@ -15,7 +15,6 @@ public class MovieContract {
 
     public static final String PATH_MOVIE = MovieTable.TABLE_NAME;
 
-
     public static final class MovieTable {
 
         public static final Uri CONTENT_URI =

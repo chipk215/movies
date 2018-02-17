@@ -16,6 +16,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+/**
+ * Adapter for the recycler list view holding movie trailer links retrieved from TheMovieDB web site
+ */
 public class TrailerAdapter  extends RecyclerView.Adapter<TrailerAdapter.TrailerHolder>  {
 
     public interface OnItemClickListener{

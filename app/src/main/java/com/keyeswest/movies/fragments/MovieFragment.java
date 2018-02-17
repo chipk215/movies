@@ -54,7 +54,6 @@ public class MovieFragment extends Fragment  {
     private String mShow;
     private String mHide;
 
-
     private Movie mMovie;
     private MovieFetcher mMovieFetcher;
 
@@ -250,7 +249,6 @@ public class MovieFragment extends Fragment  {
         mContext = getContext();
         mActivity = getActivity();
 
-
         View view = inflater.inflate(R.layout.movie_detail_fragment, container, false);
         mUnbinder = ButterKnife.bind(this, view);
 
@@ -278,44 +276,20 @@ public class MovieFragment extends Fragment  {
             @Override
             public void onClick(View v) {
 
+                /*
+                 * A filled in star represents the state where the user has made the movie a
+                 * favorite. If the user clicks on a filled in star they are initiating a request
+                 * to remove the movie from the database of favorites.
+                 *
+                 * Conversely, an unfilled star represents the state where the movie is not a user
+                 * favorite. A click on an unfilled start initiates a request to add the movie
+                 * to the database of favorites.
+                 */
                 if (mFavoriteFab.getTag().equals(getResources().getString(R.string.star))){
-
-                    showAToast(R.string.remove_favorite);
-                    mFavoriteFab.setEnabled(false);
-                    mMovieRepo.deleteMovieById(mMovie.getId(), new MovieRepo.DeleteResult() {
-                        @Override
-                        public void movieResult(int recordsDeleted) {
-                            if (recordsDeleted != 1){
-                                Log.e(TAG, "Failed to remove movie from favorites");
-                                return;
-                            }
-                            mFavoriteFab.setEnabled(true);
-                            mFavoriteFab.setImageResource(R.drawable.ic_action_star_border);
-                            mFavoriteFab.setTag(getResources().getString(R.string.border));
-
-                        }
-                    });
-
-
+                    removeFavoriteMovie();
                 }else{
 
-                    showAToast(R.string.add_favorite);
-                    mFavoriteFab.setEnabled(false);
-                    mMovieRepo.addMovie(mMovie, new MovieRepo.InsertResult() {
-                        @Override
-                        public void movieResult(Uri movieUri) {
-                            if (movieUri != null) {
-                                Log.i(TAG, "Inserted movie into database" + movieUri.toString());
-                                mFavoriteFab.setEnabled(true);
-                                mFavoriteFab.setImageResource(R.drawable.ic_action_star);
-                                mFavoriteFab.setTag(getResources().getString(R.string.star));
-                            }else{
-                                Log.i(TAG, "Failed to insert movie into database");
-
-                            }
-
-                        }
-                    });
+                    addFavoriteMovie();
                 }
             }
         });
@@ -324,25 +298,25 @@ public class MovieFragment extends Fragment  {
         setupReviewAdapter();
         setupTrailerVisibility();
         setupReviewVisibility();
-
         mRootView = view;
-
         return view;
-
     }
 
+    /**
+     * Check the database and see if the movie is a favorite.
+     * If so set the fab image to a filled in star, otherwise an unfilled star.
+     */
     private void setInitialFavoriteButtonState(){
 
-        // Set as not a favorite
-        mFavoriteFab.setImageResource(R.drawable.ic_action_star_border);
-        mFavoriteFab.setTag(getResources().getString(R.string.border));
+        // Set as not a favorite which will be overridden if movie is in db
+        setFabUnfilled();
 
+        //Query database to see if movie is in db
         mMovieRepo.getMovieById(mMovie.getId(), new MovieRepo.QueryResult() {
             @Override
             public void movieResult(List<Movie> movies) {
                 if ((movies.size() == 1) && (movies.get(0).getId() == mMovie.getId())){
-                    mFavoriteFab.setImageResource(R.drawable.ic_action_star);
-                    mFavoriteFab.setTag(getResources().getString(R.string.star));
+                    setFabFilled();
                 }
             }
         });
@@ -350,7 +324,92 @@ public class MovieFragment extends Fragment  {
     }
 
 
-    private void showAToast(int resId){
+    /**
+     * Removes movie from database of favorites.
+     */
+    private void removeFavoriteMovie(){
+        // tell the user the movie is being removed from the database
+        showToast(R.string.remove_favorite);
+
+        // disable the fab while the async sql operation is executing to prevent the user from
+        // tapping the button multiple times while the sql operation is executing. Button will be
+        // on completion of operation.
+        mFavoriteFab.setEnabled(false);
+
+        // initiate deletion of movie record
+        mMovieRepo.deleteMovieById(mMovie.getId(), new MovieRepo.DeleteResult() {
+
+            // Handle the results of the delete operation
+            @Override
+            public void movieResult(int recordsDeleted) {
+
+                // Expect 1 record to be deleted
+                if (recordsDeleted != 1){
+
+                    // Do we need to tell the user anything? This is an unexpected state.
+                    // Leave the FAB disabled and do not change the fab icon to an unfilled star
+                    Log.e(TAG, "Failed to remove movie from favorites");
+                    return;
+                }
+
+                // success case
+                mFavoriteFab.setEnabled(true);
+
+                // Change the fab to an unfilled star indicating the movie is not favored and the
+                // next click will favor the movie again
+                setFabUnfilled();
+            }
+        });
+
+    }
+
+
+    /**
+     * Add the movie to the favorites database.
+     */
+    private void addFavoriteMovie(){
+        // tell the user the movie is added to the favorites
+        showToast(R.string.add_favorite);
+
+        // disable fab while the insert operation is executing
+        mFavoriteFab.setEnabled(false);
+
+        // insert movie
+        mMovieRepo.addMovie(mMovie, new MovieRepo.InsertResult() {
+
+            // Handle insert operation results
+            @Override
+            public void movieResult(Uri movieUri) {
+                // Success is a Uri tot he new record
+                if (movieUri != null) {
+                    Log.i(TAG, "Inserted movie into database" + movieUri.toString());
+
+                    // enable the fab
+                    mFavoriteFab.setEnabled(true);
+
+                    // change the fab image to a filled in star representing the movie is now
+                    // a favorite
+                    setFabFilled();
+                }else{
+                    Log.i(TAG, "Failed to insert movie into database");
+
+                    // leave the fab disabled
+                    // leave the fab image as an unfilled star
+
+                    // consider what else to do in this failure case
+                }
+
+            }
+        });
+    }
+
+
+    /**
+     * If the user clicks the fab before the previous message has vanished then cancel the current
+     * toast.
+     * @param resId - resource id of message to be displayed
+     */
+    private void showToast(int resId){
         if (mFavoriteToast != null){
             mFavoriteToast.cancel();
         }
@@ -367,6 +426,8 @@ public class MovieFragment extends Fragment  {
     private void setupReviewVisibility() {
         // ensure the review section is initially collapsed
         hideReview();
+
+        //handle toggling the review expand/collapse button
         mShowReviewButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -386,6 +447,7 @@ public class MovieFragment extends Fragment  {
                         // note: the list of reviews will not be made visible until it is determined
                         // that there are reviews for the movie
                         mMovieReviewsFetched = true;
+                        //fetch the fist page of reviews
                         updateReviewItems(true);
 
                     }else{
@@ -406,10 +468,15 @@ public class MovieFragment extends Fragment  {
     }
 
 
-
+    /**
+     * Similar to reviews the trailers section is collapsible.
+     */
     private void setupTrailerVisibility(){
+
+        // initially hide the trailers
         hideTrailer();
 
+        // handle toggling the expand/collapse button
         mShowTrailerButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -417,20 +484,27 @@ public class MovieFragment extends Fragment  {
 
                 String tagString = (String)mShowTrailerButton.getTag();
                 if (tagString.equals(mShow)){
+                    // section is currently collapsed and user initiated expanding
 
+                    // change the button to collapse to support next action
                     mShowTrailerButton.setImageResource(R.drawable.ic_action_collapse);
                     mShowTrailerButton.setTag(mHide);
 
 
                     if (! mMovieTrailersFetched) {
+
+                        // trailer data has not yet been fetched from theMovieDB so fetch
                         mMovieTrailersFetched = true;
                         mTrailerLoadingSpinner.setVisibility(View.VISIBLE);
                         mMovieFetcher.fetchMovieTrailers(mMovie.getId(), new TrailerResults());
 
                     }else{
+
+                        // trailer data has previously been fetched so just display it
                         showTrailer();
                     }
                 }else{
+                    // trailers are currently visible to hide and swap button image
                     mShowTrailerButton.setImageResource(R.drawable.ic_action_expand);
                     mShowTrailerButton.setTag(mShow);
                     hideTrailer();
@@ -441,13 +515,11 @@ public class MovieFragment extends Fragment  {
     }
 
 
-
     @Override
     public void onDestroyView(){
         super.onDestroyView();
         mUnbinder.unbind();
     }
-
 
 
     private void playVideo(Trailer trailer){
@@ -575,6 +647,18 @@ public class MovieFragment extends Fragment  {
                 sv.scrollBy(0, NUDGE_VERTICAL_PIXELS);
             }
         });
+
+    }
+
+
+    private void setFabFilled(){
+        mFavoriteFab.setImageResource(R.drawable.ic_action_star);
+        mFavoriteFab.setTag(getResources().getString(R.string.star));
+    }
+
+    private void setFabUnfilled(){
+        mFavoriteFab.setImageResource(R.drawable.ic_action_star_border);
+        mFavoriteFab.setTag(getResources().getString(R.string.border));
 
     }
 }

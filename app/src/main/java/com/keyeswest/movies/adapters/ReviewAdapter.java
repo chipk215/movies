@@ -16,7 +16,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-
+/**
+ * Adapter for the recycler list view holding movie reviews retrieved from TheMovieDB web site
+ */
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewHolder> {
 
     private List<Review> mReviewList;
@@ -47,7 +49,6 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewHold
 
         @BindView(R.id.review_content_tv) TextView mContentTextView;
         @BindView(R.id.more_details_btn) Button mMoreDetailsButton;
-
 
         ReviewHolder(LayoutInflater inflater, ViewGroup parent){
             super(inflater.inflate(R.layout.list_item_review, parent, false));

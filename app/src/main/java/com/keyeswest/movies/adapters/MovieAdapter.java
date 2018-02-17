@@ -21,6 +21,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+/**
+ * Adapter for recycler view list holding movies retrieved from TheMovieDB web site
+ */
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder> {
 
     public interface OnItemClickListener{
@@ -32,9 +35,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder>
 
     public MovieAdapter(List<Movie> movieItems, OnItemClickListener listener){
         mMovieItems = movieItems;
-
         mListener = listener;
-
     }
 
     @Override

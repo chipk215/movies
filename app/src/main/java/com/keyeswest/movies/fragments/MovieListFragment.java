@@ -93,25 +93,6 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
         Stetho.initializeWithDefaults(getContext());
         Log.i(TAG, "MovieListFragment onCreate");
 
-        // Notes (for the future):
-        // I first attempted to manually save the state of MovieListFragment in onSaveInstanceState
-        // and learned a few things:
-        //  1) A fragment holding a reference to a POJO is required to also save the state of the
-        //     POJO on a rotation (unless the POJO is a singleton). A bit cumbersome
-        //     but feasible (I did it). But maybe using POJOs is not a great idea and
-        //     references should be to other (headless)fragments which could save their state.
-        //
-        //  2) More of an issue is reconstituting the paged MovieDB data on a rotation. I initially
-        //     saved the last paged fetched 'N' from MovieDB on rotation which maintained the view, but
-        //     the preceding pages were not fetched and so pages 1 through N-1 were not available
-        //     after rotation, unless they were also pre-fetched or by enabling the user to
-        //     effectively reverse page when scrolling up... interesting but not ready to tackle now.
-        //
-        //  3) I somewhat regret using Async task to handle the MovieDB fetches rather than
-        //     using a dedicated background thread which would enable MovieListFragment to easily queue
-        //     up page requests. Perhaps I'll change in Phase II when I learn more about saving
-        //     state and using fragments.
-        //
         //  For now setRetainInstance(true) seems to handle everything except the subtitle
         setRetainInstance(true);
 

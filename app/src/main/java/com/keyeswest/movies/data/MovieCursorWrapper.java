@@ -8,6 +8,10 @@ import android.graphics.Bitmap;
 import com.keyeswest.movies.models.Movie;
 import com.keyeswest.movies.utilities.DatabaseBitmapUtility;
 
+/**
+ * Helper for app that wraps the general cursor returned by the MovieContentProvider to a
+ * Movie specific wrapper used by the app. Linked to the definition of the Movie model data.
+ */
 public class MovieCursorWrapper extends CursorWrapper {
 
     public MovieCursorWrapper(Cursor cursor){
@@ -21,8 +25,14 @@ public class MovieCursorWrapper extends CursorWrapper {
         String title = getString(getColumnIndex(MovieContract.MovieTable.COLUMN_TITLE));
 
 
-        Bitmap posterImage = DatabaseBitmapUtility.getImage(
-                getBlob(getColumnIndex(MovieContract.MovieTable.COLUMN_POSTER)));
+        Bitmap posterImage;
+
+        byte[] posterBytes = getBlob(getColumnIndex(MovieContract.MovieTable.COLUMN_POSTER));
+        if (posterBytes != null){
+            posterImage =  DatabaseBitmapUtility.getImage(posterBytes);
+        }else{
+            posterImage = null;
+        }
 
         String synopsis = getString(getColumnIndex(MovieContract.MovieTable.COLUMN_SYNOPSIS));
         float userRating = getFloat(getColumnIndex(MovieContract.MovieTable.COLUMN_USER_RATING));

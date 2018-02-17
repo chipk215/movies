@@ -14,18 +14,19 @@ import android.support.annotation.Nullable;
 
 import static com.keyeswest.movies.data.MovieContract.MovieTable.TABLE_NAME;
 
+/**
+ * Content provider for the locally hosted database of user selected movie favorites
+ */
 public class MovieContentProvider  extends ContentProvider{
 
     //MOVIE represents the directory of movies
     public static final int MOVIE_DIRECTORY = 100;
     public static final int MOVIE_WITH_ID = 101;
 
-
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
     public static UriMatcher buildUriMatcher(){
         UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
-
         matcher.addURI(MovieContract.AUTHORITY, MovieContract.PATH_MOVIE, MOVIE_DIRECTORY);
         matcher.addURI(MovieContract.AUTHORITY, MovieContract.PATH_MOVIE + "/#", MOVIE_WITH_ID);
 
@@ -51,7 +52,6 @@ public class MovieContentProvider  extends ContentProvider{
 
         int match = sUriMatcher.match(uri);
         Cursor cursor;
-
         switch (match){
             case MOVIE_DIRECTORY:
                 cursor = db.query(TABLE_NAME,
@@ -66,13 +66,12 @@ public class MovieContentProvider  extends ContentProvider{
                 //return null;
 
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
-
         }
 
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
-
         return cursor;
     }
+
 
     @Nullable
     @Override
@@ -137,8 +136,6 @@ public class MovieContentProvider  extends ContentProvider{
         }
 
         return moviesDeleted;
-
-
     }
 
     @Override
