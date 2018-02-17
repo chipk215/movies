@@ -9,6 +9,7 @@ import android.content.UriMatcher;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
@@ -171,6 +172,41 @@ public class TestMovieContentProvider {
 
 
 
+    }
+
+
+    @Test
+    public void testDuplicateInsert(){
+        int testMovieId = 1;
+        boolean exceptionThrown = false;
+
+        /* Create movie to insert */
+        ContentValues testValues = createTestMovieRecord(testMovieId);
+
+
+        /* TestContentObserver allows us to test if notifyChange was called appropriately */
+        TestUtilities.TestContentObserver movieObserver = TestUtilities.getTestContentObserver();
+
+        ContentResolver contentResolver = mContext.getContentResolver();
+
+         /* Register a content observer to be notified of changes to data at a given URI (movie) */
+        contentResolver.registerContentObserver(
+                /* URI that we would like to observe changes to */
+                MovieContract.MovieTable.CONTENT_URI,
+                /* Whether or not to notify us if descendants of this URI change */
+                true,
+                /* The observer to register (that will receive notifyChange callbacks) */
+                movieObserver);
+
+        Uri uri = contentResolver.insert(MovieContract.MovieTable.CONTENT_URI, testValues);
+
+        try {
+            uri = contentResolver.insert(MovieContract.MovieTable.CONTENT_URI, testValues);
+            fail("Expected exception was not thrown.");
+        }catch(SQLException ex){
+            exceptionThrown=true;
+        }
+        Assert.assertTrue(exceptionThrown);
     }
 
 

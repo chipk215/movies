@@ -15,15 +15,10 @@ public class SqlResult {
 
     private Uri mResultUri;
 
-    public SqlResult(List<Movie> movies){
-        mMovies = movies;
-        mCount = 0;
-        mResultUri = null;
-    }
+    private MovieRepo.Operations mSqlOperation;
 
-    public SqlResult(Uri uri){
-        mResultUri = uri;
-    }
+
+    public SqlResult(){}
 
     public List<Movie> getMovies() {
         return mMovies;
@@ -47,5 +42,13 @@ public class SqlResult {
 
     public void setResultUri(Uri resultUri) {
         this.mResultUri = resultUri;
+    }
+
+    public MovieRepo.Operations getSqlOperation() {
+        return mSqlOperation;
+    }
+
+    public void setSqlOperation(MovieRepo.Operations sqlOperation) {
+        mSqlOperation = sqlOperation;
     }
 }

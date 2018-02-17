@@ -4,7 +4,6 @@ package com.keyeswest.movies.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -26,7 +25,6 @@ import android.widget.Toast;
 
 import com.keyeswest.movies.ErrorCondition;
 import com.keyeswest.movies.adapters.ReviewAdapter;
-import com.keyeswest.movies.data.MovieContract;
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
 import com.keyeswest.movies.models.Review;
 import com.keyeswest.movies.repos.MovieRepo;
@@ -274,7 +272,6 @@ public class MovieFragment extends Fragment  {
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-      //  setInitialFavoriteState();
         setInitialFavoriteButtonState();
 
         mFavoriteFab.setOnClickListener(new View.OnClickListener() {
@@ -284,20 +281,35 @@ public class MovieFragment extends Fragment  {
                 if (mFavoriteFab.getTag().equals(getResources().getString(R.string.star))){
 
                     showAToast(R.string.remove_favorite);
+                    mFavoriteFab.setEnabled(false);
+                    mMovieRepo.deleteMovieById(mMovie.getId(), new MovieRepo.DeleteResult() {
+                        @Override
+                        public void movieResult(int recordsDeleted) {
+                            if (recordsDeleted != 1){
+                                Log.e(TAG, "Failed to remove movie from favorites");
+                                return;
+                            }
+                            mFavoriteFab.setEnabled(true);
+
+                        }
+                    });
 
                     mFavoriteFab.setImageResource(R.drawable.ic_action_star_border);
                     mFavoriteFab.setTag(getResources().getString(R.string.border));
                 }else{
 
                     showAToast(R.string.add_favorite);
-                    mMovieRepo.addMovie(mMovie, new MovieRepo.AddMovieResult() {
+                    mFavoriteFab.setEnabled(false);
+                    mMovieRepo.addMovie(mMovie, new MovieRepo.InsertResult() {
                         @Override
                         public void movieResult(Uri movieUri) {
                             if (movieUri != null) {
                                 Log.i(TAG, "Inserted movie into database" + movieUri.toString());
+                                mFavoriteFab.setEnabled(true);
                             }else{
                                 Log.i(TAG, "Failed to insert movie into database");
                             }
+
                         }
                     });
                     mFavoriteToast.show();
@@ -324,7 +336,7 @@ public class MovieFragment extends Fragment  {
         mFavoriteFab.setImageResource(R.drawable.ic_action_star_border);
         mFavoriteFab.setTag(getResources().getString(R.string.border));
 
-        mMovieRepo.getMovieById(mMovie.getId(), new MovieRepo.MovieResult() {
+        mMovieRepo.getMovieById(mMovie.getId(), new MovieRepo.QueryResult() {
             @Override
             public void movieResult(List<Movie> movies) {
                 if ((movies.size() == 1) && (movies.get(0).getId() == mMovie.getId())){
@@ -336,44 +348,6 @@ public class MovieFragment extends Fragment  {
 
     }
 
-    private void setInitialFavoriteState(){
-
-        // Set as not a favorite
-        mFavoriteFab.setImageResource(R.drawable.ic_action_star_border);
-        mFavoriteFab.setTag(getResources().getString(R.string.border));
-
-        String[] projection={
-                MovieContract.MovieTable.COLUMN_MOVIE_ID
-        };
-
-        String selectionClause = MovieContract.MovieTable.COLUMN_MOVIE_ID + "=  ?";
-        String[] selectionArgs = { Long.toString(mMovie.getId()) };
-
-        Cursor movieCursor = mContext.getContentResolver().query(
-                MovieContract.MovieTable.CONTENT_URI,
-                /* Columns; leaving this null returns every column in the table */
-                projection,
-                /* Optional specification for columns in the "where" clause above */
-                selectionClause,
-                /* Values for "where" clause */
-                selectionArgs,
-                /* Sort order to return in Cursor */
-                null);
-
-        if ((movieCursor != null) && (movieCursor.getCount() == 1)) {
-
-                movieCursor.moveToFirst();
-                long movieId = movieCursor.getLong(movieCursor
-                        .getColumnIndex(MovieContract.MovieTable.COLUMN_MOVIE_ID));
-
-                if (mMovie.getId() == movieId){
-
-                    // set as favorite
-                    mFavoriteFab.setImageResource(R.drawable.ic_action_star);
-                    mFavoriteFab.setTag(getResources().getString(R.string.star));
-                }
-        }
-    }
 
     private void showAToast(int resId){
         if (mFavoriteToast != null){
