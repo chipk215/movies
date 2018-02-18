@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -17,8 +18,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -37,7 +40,6 @@ import com.keyeswest.movies.models.Movie;
 import com.keyeswest.movies.models.Trailer;
 import com.squareup.picasso.Picasso;
 
-import java.net.URI;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +69,12 @@ public class MovieFragment extends Fragment  {
 
     private Toast mFavoriteToast;
 
+    private enum NetworkOperations {TRAILER, REVIEW};
+    private NetworkOperations mFailedOperation = null;
+
+    private TrailerResults mTrailerHandler;
+    private ReviewResults mReviewHandler;
+
     @BindView(R.id.title_tv)TextView mTitleTextView;
     @BindView(R.id.release_date_tv)TextView mReleaseDateTextView;
     @BindView(R.id.voter_average_tv)TextView mVoterAverageTextView;
@@ -87,6 +95,12 @@ public class MovieFragment extends Fragment  {
 
     @BindView(R.id.favorite_fab)FloatingActionButton mFavoriteFab;
 
+    @BindView(R.id.error_layout) LinearLayout mErrorLayout;
+    @BindView(R.id.error_txt_cause) TextView mErrorText;
+
+    @BindView(R.id.movie_detail_layout) CoordinatorLayout mParentLayout;
+
+
     boolean mReviewIsLoading;
 
     private View mRootView;
@@ -100,6 +114,24 @@ public class MovieFragment extends Fragment  {
 
 
     /**
+     * newInstance enables a fragment argument representing a movie to be used to initialize the
+     * fragment.
+     * @param movie - the movie object that the fragment is representing.
+     * @return initialized movie fragment
+     */
+    public static MovieFragment newInstance(Movie movie){
+        Log.i(TAG, "New MovieFragment Instance");
+
+        //Re-bundle the movie since the fragment has not yet been created
+        Bundle args = new Bundle();
+        args.putParcelable(ARG_MOVIE, movie);
+        MovieFragment fragment = new MovieFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+
+    /**
      * Handles the trailer data fetched asynchronously from theMovieDB site.
      * Implements the MovieFetcherCall interface to obtain trailer data or
      * to handle errors that occurred during the fetch.
@@ -107,6 +139,12 @@ public class MovieFragment extends Fragment  {
     private  class TrailerResults implements MovieFetcherCallback<Trailer>{
         @Override
         public void updateList(List<Trailer> trailers) {
+
+
+            mParentLayout.setVisibility(View.VISIBLE);
+            mErrorLayout.setVisibility(View.GONE);
+
+            mFailedOperation = null;
 
             mTrailers.addAll(trailers);
             mTrailerLoadingSpinner.setVisibility(View.GONE);
@@ -135,7 +173,21 @@ public class MovieFragment extends Fragment  {
         @Override
         public void downloadErrorOccurred(ErrorCondition errorMessage) {
             Log.e(TAG,"Error fetching trailers: " + errorMessage);
-            mTrailerLoadingSpinner.setVisibility(View.GONE);
+
+            switch (errorCondition){
+                case NETWORK_CONNECTIVITY:
+
+                    if(mErrorLayout.getVisibility() == View.GONE){
+                        mErrorText.setText(getResources().getString(R.string.internet_error));
+                        mTrailerLoadingSpinner.setVisibility(View.GONE);
+                        mErrorLayout.setVisibility(View.VISIBLE);
+                        mParentLayout.setVisibility(View.GONE);
+                        mFailedOperation = NetworkOperations.TRAILER;
+                    }
+
+                    break;
+            }
+
         }
     }
 
@@ -150,6 +202,11 @@ public class MovieFragment extends Fragment  {
         @Override
         public void updateList(List<Review> itemList) {
             Log.i(TAG, "Updating Reviews");
+
+            mFailedOperation = null;
+
+            mParentLayout.setVisibility(View.VISIBLE);
+            mErrorLayout.setVisibility(View.GONE);
 
             mReviews.addAll(itemList);
             mReviewLoadingSpinner.setVisibility(View.GONE);
@@ -180,28 +237,25 @@ public class MovieFragment extends Fragment  {
 
         @Override
         public void downloadErrorOccurred(ErrorCondition errorMessage) {
-            Log.e(TAG, "Download error occurred" + errorMessage);
-            mReviewLoadingSpinner.setVisibility(View.GONE);
+            Log.e(TAG, "Review Download error occurred" + errorMessage);
+            switch (errorCondition){
+                case NETWORK_CONNECTIVITY:
+
+                    if(mErrorLayout.getVisibility() == View.GONE){
+                        mErrorText.setText(getResources().getString(R.string.internet_error));
+                        mReviewLoadingSpinner.setVisibility(View.GONE);
+                        mErrorLayout.setVisibility(View.VISIBLE);
+                        mParentLayout.setVisibility(View.GONE);
+                        mFailedOperation = NetworkOperations.REVIEW;
+                    }
+
+                    break;
+            }
+
         }
     }
 
 
-    /**
-     * newInstance enables a fragment argument representing a movie to be used to initialize the
-     * fragment.
-     * @param movie - the movie object that the fragment is representing.
-     * @return initialized movie fragment
-     */
-    public static MovieFragment newInstance(Movie movie){
-        Log.i(TAG, "New MovieFragment Instance");
-
-        //Re-bundle the movie since the fragment has not yet been created
-        Bundle args = new Bundle();
-        args.putParcelable(ARG_MOVIE, movie);
-        MovieFragment fragment = new MovieFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
 
 
     /**
@@ -240,6 +294,11 @@ public class MovieFragment extends Fragment  {
         mHide =  getResources().getString(R.string.hide);
 
         mReviewIsLoading = false;
+
+        mTrailerHandler = new TrailerResults();
+        mReviewHandler = new ReviewResults();
+
+        setRetainInstance(true);
 
     }
 
@@ -292,6 +351,22 @@ public class MovieFragment extends Fragment  {
                 }else{
 
                     addFavoriteMovie();
+                }
+            }
+        });
+
+        Button retryButton = view.findViewById(R.id.error_btn_retry);
+
+        retryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // determine which network operation to retry
+                if (mFailedOperation == NetworkOperations.TRAILER){
+                    mMovieFetcher.fetchMovieTrailers(mMovie.getId(), mTrailerHandler);
+                } else if (mFailedOperation == NetworkOperations.REVIEW){
+
+
+                    updateReviewItems(true);
                 }
             }
         });
@@ -395,8 +470,8 @@ public class MovieFragment extends Fragment  {
                 }else{
                     Log.i(TAG, "Failed to insert movie into database");
 
-                    // leave the fab disabled
-                    // leave the fab image as an unfilled star
+                    // leaving the fab disabled
+                    // leaving the fab image as an unfilled star
 
                     // consider what else to do in this failure case
                 }
@@ -498,7 +573,8 @@ public class MovieFragment extends Fragment  {
                         // trailer data has not yet been fetched from theMovieDB so fetch
                         mMovieTrailersFetched = true;
                         mTrailerLoadingSpinner.setVisibility(View.VISIBLE);
-                        mMovieFetcher.fetchMovieTrailers(mMovie.getId(), new TrailerResults());
+                        //why do we need a new TrailerResults object each time?
+                        mMovieFetcher.fetchMovieTrailers(mMovie.getId(), mTrailerHandler);
 
                     }else{
 
@@ -612,7 +688,7 @@ public class MovieFragment extends Fragment  {
         mReviewLoadingSpinner.setVisibility(View.VISIBLE);
         if (firstPage){
 
-            mMovieFetcher.fetchFirstReviewPage(mMovie.getId(), new ReviewResults());
+            mMovieFetcher.fetchFirstReviewPage(mMovie.getId(), mReviewHandler);
 
         }else{
             mMovieFetcher.fetchNextReviewPage(mMovie.getId());
