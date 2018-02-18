@@ -4,6 +4,7 @@ package com.keyeswest.movies.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -36,6 +37,7 @@ import com.keyeswest.movies.models.Movie;
 import com.keyeswest.movies.models.Trailer;
 import com.squareup.picasso.Picasso;
 
+import java.net.URI;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -528,10 +530,21 @@ public class MovieFragment extends Fragment  {
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         if (intent.resolveActivity(getActivity().getPackageManager()) != null){
             startActivity(intent);
-        }else{
-            //TODO inform user that video is not available
         }
 
+        //TODO revisit and handle else clause if intent is not created
+    }
+
+    private void viewReview(String url){
+        if (url != null){
+            Uri uri = Uri.parse(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            if (intent.resolveActivity(getActivity().getPackageManager()) != null){
+                startActivity(intent);
+            }
+
+            //TODO revisit and handle else clause if intent is not created
+        }
     }
 
 
@@ -551,7 +564,13 @@ public class MovieFragment extends Fragment  {
     private void setupReviewAdapter(){
 
         if (isAdded()){
-            mReviewRecyclerView.setAdapter(new ReviewAdapter(mReviews));
+            mReviewRecyclerView.setAdapter(new ReviewAdapter(mReviews, new ReviewAdapter.OnFullReviewClickListener(){
+
+                @Override
+                public void onItemClick(String reviewURL) {
+                    viewReview(reviewURL);
+                }
+            }));
             mReviewRecyclerView.setItemAnimator(new DefaultItemAnimator());
             mReviewRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override

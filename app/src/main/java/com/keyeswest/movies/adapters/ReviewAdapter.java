@@ -4,6 +4,7 @@ package com.keyeswest.movies.adapters;
 import android.graphics.Paint;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
@@ -21,10 +22,18 @@ import butterknife.ButterKnife;
  */
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewHolder> {
 
-    private List<Review> mReviewList;
+    public interface OnFullReviewClickListener{
+        void onItemClick(String reviewURL);
+    }
 
-    public ReviewAdapter(List<Review> reviewList){
+    private List<Review> mReviewList;
+    private OnFullReviewClickListener mReviewCallback;
+
+
+    public ReviewAdapter(List<Review> reviewList, OnFullReviewClickListener fullReviewCallback){
         mReviewList = reviewList;
+        mReviewCallback = fullReviewCallback;
+
     }
 
     @Override
@@ -37,7 +46,6 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewHold
     @Override
     public void onBindViewHolder(ReviewHolder holder, int position) {
         holder.bind(mReviewList.get(position));
-
     }
 
     @Override
@@ -54,11 +62,21 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewHold
             super(inflater.inflate(R.layout.list_item_review, parent, false));
 
             ButterKnife.bind(this, itemView);
-            mMoreDetailsButton.setPaintFlags(mMoreDetailsButton.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+            mMoreDetailsButton
+                    .setPaintFlags(mMoreDetailsButton.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+
         }
 
         void bind(final Review reviewItem){
             mContentTextView.setText(reviewItem.getContent());
+
+            mMoreDetailsButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mReviewCallback.onItemClick(reviewItem.getUrl());
+                }
+            });
         }
 
     }
