@@ -20,7 +20,7 @@ public class MovieRepo  {
     public static final String MOVIE_KEY = "MOVIE_KEY";
     public static final String MOVIE_ID_KEY = "MOVIE_ID_KEY";
 
-    public enum Operations{ CREATE, READ, UPDATE, DELETE}
+    public enum Operations{ CREATE, QUERY_SET, QUERY_COUNT, UPDATE, DELETE}
 
 
     private Context mContext;
@@ -33,7 +33,7 @@ public class MovieRepo  {
     }
 
 
-    public interface QueryResult {
+    public interface QuerySetResult {
         void movieResult(List<Movie> movies);
     }
 
@@ -41,8 +41,8 @@ public class MovieRepo  {
         void movieResult(Uri movieUri);
     }
 
-    public interface DeleteResult{
-        void movieResult(int recordsDeleted);
+    public interface QueryCountResult {
+        void movieResult(int recordCount);
     }
 
     //================================================================================
@@ -51,7 +51,6 @@ public class MovieRepo  {
     public void addMovie(Movie movie,  InsertResult callback){
 
         //TODO first check that movie is not in database
-
 
 
         Bundle queryBundle = new Bundle();
@@ -68,7 +67,7 @@ public class MovieRepo  {
     //================================================================================
     // Read
     //================================================================================
-    public void getMovieById(long movieId, QueryResult callback){
+    public void getMovieById(long movieId, QuerySetResult callback){
 
 
         String selectionClause = MovieContract.MovieTable.COLUMN_MOVIE_ID + "=  ?";
@@ -77,10 +76,19 @@ public class MovieRepo  {
         Bundle queryBundle = new Bundle();
         queryBundle.putString(SELECTION_CLAUSE_KEY, selectionClause);
         queryBundle.putStringArray(SELECTION_ARGS_KEY, selectionArgs);
-        queryBundle.putSerializable(OPERATION_KEY, Operations.READ);
+        queryBundle.putSerializable(OPERATION_KEY, Operations.QUERY_SET);
 
         SqlTask sqlTask = new SqlTask(mContext);
-        sqlTask.setQueryResult(callback);
+        sqlTask.setQuerySetResult(callback);
+        sqlTask.execute(queryBundle);
+
+    }
+
+    public void getMovieCount( QueryCountResult callback){
+        Bundle queryBundle = new Bundle();
+        queryBundle.putSerializable(OPERATION_KEY, Operations.QUERY_COUNT);
+        SqlTask sqlTask = new SqlTask(mContext);
+        sqlTask.setQueryCountResult(callback);
         sqlTask.execute(queryBundle);
 
     }
@@ -89,12 +97,13 @@ public class MovieRepo  {
     //================================================================================
     // Delete
     //================================================================================
-    public void deleteMovieById(long movieId, DeleteResult callback){
+    public void deleteMovieById(long movieId, QueryCountResult callback){
         Bundle queryBundle = new Bundle();
         queryBundle.putLong(MOVIE_ID_KEY, movieId);
         queryBundle.putSerializable(OPERATION_KEY, Operations.DELETE);
         SqlTask sqlTask = new SqlTask(mContext);
-        sqlTask.setDeleteResult(callback);
+        // delete returns an integer count
+        sqlTask.setQueryCountResult(callback);
         sqlTask.execute(queryBundle);
     }
 

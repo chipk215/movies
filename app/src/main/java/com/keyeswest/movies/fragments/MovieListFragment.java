@@ -26,10 +26,12 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.stetho.Stetho;
 import com.keyeswest.movies.DetailMovieActivity;
 import com.keyeswest.movies.ErrorCondition;
+import com.keyeswest.movies.repos.MovieRepo;
 import com.keyeswest.movies.utilities.MovieFetcher;
 import com.keyeswest.movies.R;
 import com.keyeswest.movies.adapters.MovieAdapter;
@@ -49,12 +51,14 @@ import butterknife.Unbinder;
 public class MovieListFragment extends Fragment implements MovieFetcherCallback<Movie> {
 
     private static final String TAG = "MovieListFragment";
-    private static final int MOVIE_DETAIL = 1;
+
     private static final int NUMBER_COLUMNS = 3;
 
     private static final String SUB_TITLE_KEY = "subTitleKey";
 
     private boolean mIsLoading = false;
+
+    private boolean mShowFavoriteMenu;
 
     public enum MovieFilter{
         POPULAR, TOP_RATED
@@ -72,11 +76,14 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
     @BindView(R.id.error_txt_cause) TextView mErrorText;
 
+
     private MovieFilter mCurrentFilter;
 
     private ActionBar mActionBar;
 
     private Unbinder mUnbinder;
+
+    private MovieRepo mMovieRepo;
 
 
     // Implement MovieListFragment as a Singleton (although the default constructor cannot be private)
@@ -100,6 +107,9 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
         mCurrentFilter = MovieFilter.POPULAR;
 
+        mMovieRepo = new MovieRepo(getContext());
+
+
         setHasOptionsMenu(true);
 
     }
@@ -116,16 +126,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
     }
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState){
-        super.onActivityCreated(savedInstanceState);
-        Log.i(TAG, "MovieListFragment onActivityCreated");
-    }
 
-    @Override
-    public void onDestroy(){
-        super.onDestroy();
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -170,6 +171,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
             }
         });
 
+
         setupMovieAdapter();
 
         // Can not start loading in onCreate because of the Progress Bar
@@ -182,9 +184,34 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
     }
 
     @Override
+    public void onResume(){
+        super.onResume();
+        mMovieRepo.getMovieCount(new MovieRepo.QueryCountResult() {
+            @Override
+            public void movieResult(int recordCount) {
+                Log.i(TAG, "Number of favorites= " + recordCount);
+                if (recordCount > 0){
+                    mShowFavoriteMenu = true;
+                }else{
+                    mShowFavoriteMenu = false;
+                }
+
+            }
+        });
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_movie_sort_order, menu);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu){
+        super.onPrepareOptionsMenu(menu);
+        MenuItem favorite = menu.findItem(R.id.favorite_type);
+        favorite.setVisible(mShowFavoriteMenu);
+
     }
 
 
@@ -213,6 +240,9 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
                 //noinspection ConstantConditions
                 subTitle = getContext().getResources().getString(R.string.top_rated);
                 changeMovieData(MovieFilter.TOP_RATED, subTitle);
+                return true;
+
+            case R.id.favorite_type:
                 return true;
 
             default:
@@ -274,33 +304,6 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
     }
 
 
-    /**
-     * TODO - this is not working the trailers are not being returned with the intent.
-     *        Tests and debug code show the intent is packaged with the trailer data
-     * @param requestCode
-     * @param resultCode
-     * @param data
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data){
-        if (resultCode != Activity.RESULT_OK){
-            return;
-        }
-        if (requestCode == MOVIE_DETAIL){
-
-            if (data == null){
-                return;
-            }
-
-            Movie updatedMovie = DetailMovieActivity.getMovie(data);
-            Log.i(TAG, "Movie has trailers: "+ updatedMovie.getTrailers().size());
-
-            //TODO find corresponding movie in movie list and update
-
-
-        }
-    }
-
 
     @Override
     public void onDestroyView(){
@@ -319,7 +322,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
                     Intent intent= DetailMovieActivity.newIntent(getContext(),movie);
 
                     try{
-                        startActivityForResult(intent, MOVIE_DETAIL);
+                        startActivity(intent);
 
                     }catch (ActivityNotFoundException anf){
                         Log.e(TAG, "Activity not found" + anf);

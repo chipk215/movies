@@ -32,9 +32,9 @@ public class SqlTask extends AsyncTask<Bundle,Void,SqlResult> {
     private static final String TAG = "SqlTask";
 
     private Context mContext;
-    private MovieRepo.QueryResult mQueryResult;
+    private MovieRepo.QuerySetResult mQuerySetResult;
     private MovieRepo.InsertResult mInsertResult;
-    private MovieRepo.DeleteResult mDeleteResult;
+    private MovieRepo.QueryCountResult mQueryCountResult;
     private Exception caughtException = null;
 
 
@@ -76,7 +76,7 @@ public class SqlTask extends AsyncTask<Bundle,Void,SqlResult> {
                     result.setResultUri(uri);
                     return result;
 
-                case READ:
+                case QUERY_SET:
 
                     //query the database
                     Cursor cursor = mContext.getContentResolver().query(
@@ -123,6 +123,29 @@ public class SqlTask extends AsyncTask<Bundle,Void,SqlResult> {
                     result.setCount(deleted);
 
                     return result;
+
+                case QUERY_COUNT:
+                    // queries the collection for a count of records matching query
+                    //query the database
+                    Cursor queryCursor = mContext.getContentResolver().query(
+                            MovieContract.MovieTable.CONTENT_URI,
+                                /* Columns; leaving this null returns every column in the table */
+                            null,
+                                /* Optional specification for columns in the projection clause above */
+                            selectionClause,
+                                /* Values for "where" clause */
+                            selectionArgs,
+                                /* Sort order to return in Cursor */
+                            null);
+
+                    if (queryCursor != null){
+                        result.setCount(queryCursor.getCount());
+                        queryCursor.close();
+                    }else{
+                        result.setCount(0);
+                    }
+
+                    return result;
             }
 
             return null;
@@ -145,12 +168,13 @@ public class SqlTask extends AsyncTask<Bundle,Void,SqlResult> {
                     mInsertResult.movieResult(sqlResult.getResultUri());
                     break;
 
-                case READ:
-                    mQueryResult.movieResult(sqlResult.getMovies());
+                case QUERY_SET:
+                    mQuerySetResult.movieResult(sqlResult.getMovies());
                     break;
 
+                case QUERY_COUNT:
                 case DELETE:
-                    mDeleteResult.movieResult(sqlResult.getCount());
+                    mQueryCountResult.movieResult(sqlResult.getCount());
                     break;
 
                 default:
@@ -170,16 +194,16 @@ public class SqlTask extends AsyncTask<Bundle,Void,SqlResult> {
     }
 
 
-    public void setQueryResult(MovieRepo.QueryResult queryResult) {
-        mQueryResult = queryResult;
+    public void setQuerySetResult(MovieRepo.QuerySetResult querySetResult) {
+        mQuerySetResult = querySetResult;
     }
 
     public void setInsertResult(MovieRepo.InsertResult insertResult) {
         mInsertResult = insertResult;
     }
 
-    public void setDeleteResult(MovieRepo.DeleteResult deleteResult) {
-        mDeleteResult = deleteResult;
+    public void setQueryCountResult(MovieRepo.QueryCountResult queryCountResult) {
+        mQueryCountResult = queryCountResult;
     }
 
     private ContentValues getContentValues(Movie movie) throws IOException{

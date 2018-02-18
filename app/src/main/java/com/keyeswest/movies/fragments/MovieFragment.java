@@ -414,7 +414,7 @@ public class MovieFragment extends Fragment  {
         setFabUnfilled();
 
         //Query database to see if movie is in db
-        mMovieRepo.getMovieById(mMovie.getId(), new MovieRepo.QueryResult() {
+        mMovieRepo.getMovieById(mMovie.getId(), new MovieRepo.QuerySetResult() {
             @Override
             public void movieResult(List<Movie> movies) {
                 if ((movies.size() == 1) && (movies.get(0).getId() == mMovie.getId())){
@@ -439,14 +439,14 @@ public class MovieFragment extends Fragment  {
         mFavoriteFab.setEnabled(false);
 
         // initiate deletion of movie record
-        mMovieRepo.deleteMovieById(mMovie.getId(), new MovieRepo.DeleteResult() {
+        mMovieRepo.deleteMovieById(mMovie.getId(), new MovieRepo.QueryCountResult() {
 
             // Handle the results of the delete operation
             @Override
-            public void movieResult(int recordsDeleted) {
+            public void movieResult(int recordCount) {
 
                 // Expect 1 record to be deleted
-                if (recordsDeleted != 1){
+                if (recordCount != 1){
 
                     // Do we need to tell the user anything? This is an unexpected state.
                     // Leave the FAB disabled and do not change the fab icon to an unfilled star

@@ -5,6 +5,7 @@
     <string name="internet_error">Not connected to internet</string>
     <string name="popular">Popular</string>
     <string name="top_rated">Top Rated</string>
+    <string name="favorite">Favorite</string>
     <string name="movie_poster_thumbnail">"Movie Poster Thumbnail"</string>
 
 

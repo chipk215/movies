@@ -241,7 +241,7 @@ public class TestMovieContentProvider {
 
         database.close();
 
-        /* Perform the ContentProvider query */
+        /* Perform the ContentProvider query which returns all the movies */
         ContentResolver resolver = mContext.getContentResolver();
         Cursor movieCursor = resolver.query(
                 MovieContract.MovieTable.CONTENT_URI,
@@ -271,22 +271,15 @@ public class TestMovieContentProvider {
         Movie movie = cursor.getMovie();
 
         // Check the id
-      //  long actualId = movieCursor.getLong(movieCursor
-       //         .getColumnIndex(MovieContract.MovieTable.COLUMN_MOVIE_ID));
         String failId = "Movie ID data is incorrect.";
         assertEquals(failId, (long)testMovieId, movie.getId());
 
         // Check the title
-      //  String actualTitle =
-       //         movieCursor.getString(movieCursor
-       //                 .getColumnIndex(MovieContract.MovieTable.COLUMN_ORIGINAL_TITLE));
         String failMessage = "Original Title data is incorrect.";
         assertEquals(failMessage, ORIGINAL_TITLE, movie.getOriginalTitle());
 
 
         //check the user rating
-       // float actualRating = movieCursor.getFloat(movieCursor.
-        //        getColumnIndex(MovieContract.MovieTable.COLUMN_USER_RATING));
         String failRating = "User rating is incorrect.";
         assertEquals(failRating, USER_RATING, movie.getVoteAverage());
         movieCursor.close();
@@ -385,10 +378,11 @@ public class TestMovieContentProvider {
         Assert.assertEquals(failMessage, 0, movieCursor.getCount());
     }
 
+
+
     //================================================================================
     // Test Delete (for a single item)
     //================================================================================
-
 
     /**
      * Tests deleting a single row of data via a ContentResolver
@@ -455,7 +449,6 @@ public class TestMovieContentProvider {
 
 
     }
-
 
 
 
