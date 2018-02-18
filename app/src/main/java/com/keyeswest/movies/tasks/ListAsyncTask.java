@@ -41,13 +41,7 @@ public class ListAsyncTask extends AsyncTask<URL, Void, String> {
     protected void onPreExecute(){
 
         // check network connectivity
-        ConnectivityManager connectivityManager =
-                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager != null ? connectivityManager.getActiveNetworkInfo() : null;
-        if (networkInfo == null || !networkInfo.isConnected() ||
-                (networkInfo.getType() != ConnectivityManager.TYPE_WIFI
-                        && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
-            // If no connectivity, cancel task and update Callback with null data.
+        if (! NetworkUtilities.isNetworkAvailable(mContext)){
             mResultsCallback.downloadErrorOccurred(ResultsCallback.errorCondition.NETWORK_CONNECTIVITY);
             cancel(true);
         }

@@ -38,6 +38,7 @@ import com.keyeswest.movies.adapters.TrailerAdapter;
 
 import com.keyeswest.movies.models.Movie;
 import com.keyeswest.movies.models.Trailer;
+import com.keyeswest.movies.utilities.NetworkUtilities;
 import com.squareup.picasso.Picasso;
 
 import java.text.DecimalFormat;
@@ -55,23 +56,33 @@ public class MovieFragment extends Fragment  {
 
     private static final int NUDGE_VERTICAL_PIXELS = 400;
 
+    // convenience properties holding resource strings
     private String mShow;
     private String mHide;
 
+    // the movie associated with the movie fragment
     private Movie mMovie;
+    // movieFetcher to fetch data from theMovieDB
     private MovieFetcher mMovieFetcher;
 
+    // state variables used to indicate if trailers and reviews have been fetched for the first time
     private boolean mMovieTrailersFetched;
     private boolean mMovieReviewsFetched;
 
+    // list of trailers and reviews fetched from theMovieDB
     private List<Trailer> mTrailers;
     private List<Review> mReviews;
 
+    // used to communicate movie has been favored or unfavored
     private Toast mFavoriteToast;
 
-    private enum NetworkOperations {TRAILER, REVIEW};
+    // helper to handle failed network operations for fetching trailers, reviews and intents for
+    // playing videos and accessing movie reviews online
+    private enum NetworkOperations {TRAILER, REVIEW, ACTION_VIEW};
     private NetworkOperations mFailedOperation = null;
+    private Intent mFailedImplicitIntent = null;
 
+    // callback handlers for async fetching of trailer and review data
     private TrailerResults mTrailerHandler;
     private ReviewResults mReviewHandler;
 
@@ -100,16 +111,20 @@ public class MovieFragment extends Fragment  {
 
     @BindView(R.id.movie_detail_layout) CoordinatorLayout mParentLayout;
 
-
+    // true when loading a review
     boolean mReviewIsLoading;
 
+    // reference to top level view to access scrollview for programmatic adjustment
     private View mRootView;
 
+    // ButterKnife helper
     private Unbinder mUnbinder;
 
+    // stash the context and activity for convenience
     Context mContext;
     Activity mActivity;
 
+    // movie repo for SQL access
     private MovieRepo mMovieRepo;
 
 
@@ -257,7 +272,6 @@ public class MovieFragment extends Fragment  {
 
 
 
-
     /**
      *  In conjunction with the construction of the fragment using newInstance, fragment arguments
      *  are retrieved and used to initialize the movie fragment.
@@ -361,18 +375,24 @@ public class MovieFragment extends Fragment  {
             @Override
             public void onClick(View v) {
                 // determine which network operation to retry
-                if (mFailedOperation == NetworkOperations.TRAILER){
-                    mMovieFetcher.fetchMovieTrailers(mMovie.getId(), mTrailerHandler);
-                } else if (mFailedOperation == NetworkOperations.REVIEW){
 
-                    int currentPage = mMovieFetcher.getCurrentReviewPage();
-                    if (currentPage > 1){
-                        updateReviewItems(false);
-                    }else{
-                        updateReviewItems(true);
-                    }
-
+                switch(mFailedOperation){
+                    case TRAILER:
+                        mMovieFetcher.fetchMovieTrailers(mMovie.getId(), mTrailerHandler);
+                        break;
+                    case REVIEW:
+                        int currentPage = mMovieFetcher.getCurrentReviewPage();
+                        if (currentPage > 1){
+                            updateReviewItems(false);
+                        }else{
+                            updateReviewItems(true);
+                        }
+                        break;
+                    case ACTION_VIEW:
+                        startActivityWithIntent(mFailedImplicitIntent);
+                        break;
                 }
+
             }
         });
 
@@ -610,7 +630,7 @@ public class MovieFragment extends Fragment  {
         Uri uri = trailer.getVideoUri();
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         if (intent.resolveActivity(getActivity().getPackageManager()) != null){
-            startActivity(intent);
+            startActivityWithIntent(intent);
         }
 
         //TODO revisit and handle else clause if intent is not created
@@ -621,10 +641,21 @@ public class MovieFragment extends Fragment  {
             Uri uri = Uri.parse(url);
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             if (intent.resolveActivity(getActivity().getPackageManager()) != null){
-                startActivity(intent);
+                startActivityWithIntent(intent);
             }
 
             //TODO revisit and handle else clause if intent is not created
+        }
+    }
+
+    private void startActivityWithIntent(Intent intent){
+        if (NetworkUtilities.isNetworkAvailable(mContext)) {
+            clearNetworkErrorMessage();
+            startActivity(intent);
+        }else{
+
+            //post error message
+            postNetworkErrorMessage(intent);
         }
     }
 
@@ -760,5 +791,32 @@ public class MovieFragment extends Fragment  {
         mFavoriteFab.setImageResource(R.drawable.ic_action_star_border);
         mFavoriteFab.setTag(getResources().getString(R.string.border));
 
+    }
+
+    /**
+     * Displays error message if network connectivity is lost prior to starting an implicit
+     * intent activity like playing a trailer or viewing a review online
+     * @param intent - the implicit intent
+     */
+    private void postNetworkErrorMessage(Intent intent){
+        if(mErrorLayout.getVisibility() == View.GONE){
+            mErrorText.setText(getResources().getString(R.string.internet_error));
+            mErrorLayout.setVisibility(View.VISIBLE);
+            mParentLayout.setVisibility(View.GONE);
+            mFailedOperation = NetworkOperations.ACTION_VIEW;
+            mFailedImplicitIntent = intent;
+        }
+
+    }
+
+
+    /**
+     * Clears the network error message if after network connectivity is re-established
+     */
+    private void clearNetworkErrorMessage(){
+        mErrorLayout.setVisibility(View.GONE);
+        mParentLayout.setVisibility(View.VISIBLE);
+        mFailedOperation = null;
+        mFailedImplicitIntent = null;
     }
 }
