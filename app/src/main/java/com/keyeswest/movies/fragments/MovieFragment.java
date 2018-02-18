@@ -365,8 +365,13 @@ public class MovieFragment extends Fragment  {
                     mMovieFetcher.fetchMovieTrailers(mMovie.getId(), mTrailerHandler);
                 } else if (mFailedOperation == NetworkOperations.REVIEW){
 
+                    int currentPage = mMovieFetcher.getCurrentReviewPage();
+                    if (currentPage > 1){
+                        updateReviewItems(false);
+                    }else{
+                        updateReviewItems(true);
+                    }
 
-                    updateReviewItems(true);
                 }
             }
         });

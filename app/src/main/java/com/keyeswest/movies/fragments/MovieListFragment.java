@@ -159,6 +159,13 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
         retryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                int currentPage = mMovieFetcher.getCurrentMoviePage();
+                if (currentPage  > 1){
+                    updateItems(false);
+                }else{
+                    updateItems(true);
+                }
                 updateItems(true);
             }
         });

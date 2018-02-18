@@ -53,8 +53,8 @@ public class MovieFetcher  {
     // Save the endpoint and page number for next page request
     private String mMovieEndpoint;
 
-
     private PageCounter mMoviePageCounter;
+
     private PageCounter mReviewPageCounter;
 
 
@@ -232,14 +232,29 @@ public class MovieFetcher  {
     }
 
 
-
-
     private void setMovieEndpoint(MovieListFragment.MovieFilter filter){
         switch (filter){
             case POPULAR: mMovieEndpoint = POPULAR_ENDPOINT;
                 break;
             case TOP_RATED: mMovieEndpoint = TOP_RATED_ENDPOINT;
         }
+    }
+
+
+    public int getCurrentReviewPage(){
+        if (mReviewPageCounter != null){
+            return mReviewPageCounter.getCurrentPageNumber();
+        }
+
+        return 1;
+    }
+
+    public int getCurrentMoviePage(){
+        if (mMoviePageCounter != null) {
+            return mMoviePageCounter.getCurrentPageNumber();
+        }
+        return 1;
+
     }
 
 }
