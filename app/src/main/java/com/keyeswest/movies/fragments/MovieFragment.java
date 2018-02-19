@@ -82,7 +82,7 @@ public class MovieFragment extends Fragment  {
 
     // helper to handle failed network operations for fetching trailers, reviews and intents for
     // playing videos and accessing movie reviews online
-    private enum NetworkOperations {TRAILER, REVIEW, ACTION_VIEW};
+    private enum NetworkOperations {TRAILER, REVIEW, ACTION_VIEW}
     private NetworkOperations mFailedOperation = null;
     private Intent mFailedImplicitIntent = null;
 
@@ -857,8 +857,6 @@ public class MovieFragment extends Fragment  {
 
         }
     }
-
-
 
 
     /**

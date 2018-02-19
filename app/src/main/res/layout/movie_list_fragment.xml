@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
@@ -10,7 +12,8 @@
         android:id="@+id/movie_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.keyeswest.movies.MovieListActivity"/>
+        tools:context="com.keyeswest.movies.MovieListActivity"
+       />
 
 
     <ProgressBar
@@ -23,7 +26,57 @@
 
 
     <!-- Attribution http://blog.iamsuleiman.com/android-pagination-error-handling/ -->
-    <include layout="@layout/error_layout"/>
+    <include
+        layout="@layout/error_layout"
+        />
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/no_favorite_layout"
+        android:visibility="gone"
+        >
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="100dp"
+            android:text="@string/no_favorites"
+            android:textColor="@android:color/holo_blue_dark"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/popularButton"
+            android:layout_width="168dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="44dp"
+            android:text="@string/view_popular"
+            app:layout_constraintEnd_toStartOf="@+id/top_rated_button"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+        <Button
+            android:id="@+id/top_rated_button"
+            android:layout_width="152dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="44dp"
+            android:text="@string/view_top_rated"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/popularButton"
+            app:layout_constraintTop_toBottomOf="@+id/textView2" />
+    </android.support.constraint.ConstraintLayout>
 
 </FrameLayout>
 

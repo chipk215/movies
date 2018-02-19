@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -79,6 +80,12 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
     @BindView(R.id.error_txt_cause) TextView mErrorText;
 
+    @BindView(R.id.no_favorite_layout)ConstraintLayout mNoFavoritesView;
+
+    @BindView(R.id.top_rated_button) Button mTopRatedButton;
+
+    @BindView(R.id.popularButton)Button mPopularButton;
+
     private MovieFilter mCurrentFilter;
 
     private ActionBar mActionBar;
@@ -86,6 +93,8 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
     private Unbinder mUnbinder;
 
     private MovieRepo mMovieRepo;
+
+    private MenuItem mFavoriteItem;
 
     public static MovieListFragment newInstance(){
         Log.i(TAG, "New MovieListFragment Instance");
@@ -147,6 +156,24 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
         View view = inflater.inflate(R.layout.movie_list_fragment, container, false);
         mUnbinder = ButterKnife.bind(this, view);
+
+        mNoFavoritesView.setVisibility(View.GONE);
+
+        mPopularButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mNoFavoritesView.setVisibility(View.GONE);
+                popularSelected();
+            }
+        });
+
+        mTopRatedButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mNoFavoritesView.setVisibility(View.GONE);
+                topRatedSelected();
+            }
+        });
 
         //noinspection ConstantConditions
         mActionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
@@ -210,8 +237,8 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
     @Override
     public void onPrepareOptionsMenu(Menu menu){
         super.onPrepareOptionsMenu(menu);
-        MenuItem favorite = menu.findItem(R.id.favorite_type);
-        favorite.setVisible(mShowFavoriteMenu);
+        mFavoriteItem = menu.findItem(R.id.favorite_type);
+        mFavoriteItem.setVisible(mShowFavoriteMenu);
 
     }
 
@@ -226,25 +253,20 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
-        String subTitle;
+        mNoFavoritesView.setVisibility(View.GONE);
         switch(item.getItemId()){
 
             case R.id.popular_type:
-                //noinspection ConstantConditions
-                subTitle= getContext().getResources().getString(R.string.popular);
-                changeMovieData(MovieFilter.POPULAR, subTitle);
-
+                popularSelected();
                 return true;
 
             case R.id.top_rated_type:
 
-                //noinspection ConstantConditions
-                subTitle = getContext().getResources().getString(R.string.top_rated);
-                changeMovieData(MovieFilter.TOP_RATED, subTitle);
+                topRatedSelected();
                 return true;
 
             case R.id.favorite_type:
-                subTitle = getContext().getResources().getString(R.string.favorite);
+                String subTitle = getContext().getResources().getString(R.string.favorite);
                 changeMovieData(MovieFilter.FAVORITE, subTitle);
 
                 return true;
@@ -252,6 +274,29 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+
+    /*
+     * Refactored to be used by both the menu handler and for dealing with empty favorite list
+     * when returning from detail fragment.
+     */
+    private void popularSelected(){
+        String subTitle;
+        //noinspection ConstantConditions
+        subTitle= getContext().getResources().getString(R.string.popular);
+        changeMovieData(MovieFilter.POPULAR, subTitle);
+    }
+
+    /*
+     * Refactored to be used by both the menu handler and for dealing with empty favorite list
+     * when returning from detail fragment.
+     */
+    private void topRatedSelected(){
+        String subTitle;
+        //noinspection ConstantConditions
+        subTitle = getContext().getResources().getString(R.string.top_rated);
+        changeMovieData(MovieFilter.TOP_RATED, subTitle);
     }
 
 
@@ -307,6 +352,16 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
         hideLoadingSpinner();
     }
 
+
+    /**
+     * Handles the returned intent data from the movie detail fragment when viewing a favorite movie.
+     * @param requestCode - corresponding intent code
+     * @param resultCode - success
+     * @param data - intent containing a boolean extra and a long integer extra
+     *             - the boolean extra indicates whether the user unfavored the movie
+     *             - the long integer corresponds to the movie id of the unfavored movie
+     *
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == DETAIL_ACTIVITY){
@@ -314,22 +369,40 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
                 boolean wasRemoved = DetailMovieActivity.favoriteWasRemoved(data);
                 if (wasRemoved){
-                     long movieId = DetailMovieActivity.getMovieId(data);
 
-                     int index = findMovieInList(movieId);
+                    // remove it from the list of movies being displayed
+                    long movieId = DetailMovieActivity.getMovieId(data);
 
-                     if (index != -1) {
-                         mItems.remove(index);
-                         mMovieRecyclerView.getAdapter().notifyItemRemoved(index);
+                    int index = findMovieInList(movieId);
 
-                     }
+                    // -1 indicates the movie could not be found in the list, an unexpected error
+                    // condition
+
+                    if (index != -1) {
+
+                        // remove the movie from the list
+                        mItems.remove(index);
+                        mMovieRecyclerView.getAdapter().notifyItemRemoved(index);
+
+                        if (mItems.isEmpty()){
+
+                            // if after removing the favorite movie there are no more favorite
+                            // movies to show then display a no favorite message and guide
+                            // the user to viewing popular or top rated movies
+                            mNoFavoritesView.setVisibility(View.VISIBLE);
+                            mFavoriteItem.setVisible(false);
+                        }
+                    }
                 }
             }
         }
-
     }
 
 
+    /*
+     * Just a quick linear search for a movie in the favorites list.
+     * This could be optimized (hashed) to handle large lists.
+     */
     private int findMovieInList(long movieId){
         int result = -1;
 
@@ -338,7 +411,6 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
                 return i;
             }
         }
-
         return result;
     }
 
@@ -367,10 +439,6 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
                             intent= DetailMovieActivity.newIntent(getContext(),movie);
                             startActivity(intent);
                         }
-
-
-
-
 
                     }catch (ActivityNotFoundException anf){
                             Log.e(TAG, "Activity not found" + anf);

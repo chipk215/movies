@@ -34,5 +34,9 @@
     <string name="add_favorite">Added Favorite</string>
     <string name="remove_favorite">Removed Favorite</string>
 
+    <string name="no_favorites">No Favorite Movies To Display.</string>
+    <string name="view_top_rated">View Top Rated Movies</string>
+    <string name="view_popular">View Popular Movies</string>
+
 
 </resources>
