@@ -76,7 +76,6 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
     @BindView(R.id.error_txt_cause) TextView mErrorText;
 
-
     private MovieFilter mCurrentFilter;
 
     private ActionBar mActionBar;
@@ -85,8 +84,6 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
     private MovieRepo mMovieRepo;
 
-
-    // Implement MovieListFragment as a Singleton (although the default constructor cannot be private)
     public static MovieListFragment newInstance(){
         Log.i(TAG, "New MovieListFragment Instance");
         return new MovieListFragment();
@@ -170,8 +167,6 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
                 updateItems(true);
             }
         });
-
-
 
 
         setupMovieAdapter();
@@ -277,10 +272,8 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
         if ((movieItemList != null) && (! movieItemList.isEmpty())){
 
             mItems.addAll(movieItemList);
-
             mMovieRecyclerView.getAdapter().notifyItemInserted(mItems.size()-1);
         }
-
 
     }
 
@@ -327,7 +320,14 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
             mMovieRecyclerView.setAdapter(new MovieAdapter(mItems, new MovieAdapter.OnItemClickListener() {
                 @Override
                 public void onItemClick(Movie movie) {
-                    Intent intent= DetailMovieActivity.newIntent(getContext(),movie);
+                    Intent intent;
+                    if (mCurrentFilter == MovieFilter.FAVORITE){
+                        intent =DetailMovieActivity.newIntent(getContext(), movie.getId());
+
+                    }else{
+                        intent= DetailMovieActivity.newIntent(getContext(),movie);
+                    }
+
 
                     try{
                         startActivity(intent);
@@ -389,9 +389,8 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
         mErrorLayout.setVisibility(View.GONE);
 
-
         if (firstPage){
-
+            // this prevents reloading the list after a rotation
             if (mItems.isEmpty()) {
                 mMovieFetcher.fetchFirstMoviePage(mCurrentFilter, this);
                 mIsLoading = true;

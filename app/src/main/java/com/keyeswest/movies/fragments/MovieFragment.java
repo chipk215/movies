@@ -53,6 +53,7 @@ import butterknife.Unbinder;
 public class MovieFragment extends Fragment  {
     private static final String TAG = "MovieFragment";
     private static final String ARG_MOVIE = "movie_arg";
+    private static final String ARG_MOVIE_ID = "movie_arg_id";
 
     private static final int NUDGE_VERTICAL_PIXELS = 400;
 
@@ -62,6 +63,8 @@ public class MovieFragment extends Fragment  {
 
     // the movie associated with the movie fragment
     private Movie mMovie;
+    private long mMovieId;
+
     // movieFetcher to fetch data from theMovieDB
     private MovieFetcher mMovieFetcher;
 
@@ -140,6 +143,17 @@ public class MovieFragment extends Fragment  {
         //Re-bundle the movie since the fragment has not yet been created
         Bundle args = new Bundle();
         args.putParcelable(ARG_MOVIE, movie);
+        MovieFragment fragment = new MovieFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static MovieFragment newInstance(long movieId){
+        Log.i(TAG, "New MovieFragment Instance");
+
+        //Re-bundle the movie since the fragment has not yet been created
+        Bundle args = new Bundle();
+        args.putLong(ARG_MOVIE_ID, movieId);
         MovieFragment fragment = new MovieFragment();
         fragment.setArguments(args);
         return fragment;
@@ -288,6 +302,9 @@ public class MovieFragment extends Fragment  {
         Bundle bundle = getArguments();
         if (bundle != null){
             mMovie = bundle.getParcelable(ARG_MOVIE);
+            if (mMovie == null){
+                mMovieId = bundle.getLong(ARG_MOVIE_ID);
+            }
         }
         else{
             Log.e(TAG, "An expected movie object was not provided to initialize the fragment");
@@ -327,47 +344,27 @@ public class MovieFragment extends Fragment  {
         View view = inflater.inflate(R.layout.movie_detail_fragment, container, false);
         mUnbinder = ButterKnife.bind(this, view);
 
-        mTitleTextView.setText(mMovie.getTitle());
+        if (mMovie != null){
+            updateView();
+        }else{
+            // get the movie from the database
+            mMovieRepo.getMovieById(mMovieId, new MovieRepo.QuerySetResult() {
+                @Override
+                public void movieResult(List<Movie> movies) {
 
-        mReleaseDateTextView.setText(mMovie.getReleaseDate());
+                    // or error checking
+                    mMovie = movies.get(0);
+                    updateView();
 
-        DecimalFormat decimalFormat = new DecimalFormat("#.00");
+                }
+            });
+        }
 
-        mVoterAverageTextView.setText(decimalFormat.format(mMovie.getVoteAverage()));
-
-        mPopularityTextView.setText(decimalFormat.format(mMovie.getPopularity()));
-
-        String imagePath = MovieFetcher.getPosterPathURL(mMovie.getPosterPath());
-        Picasso.with(getContext()).load(imagePath).into(mPosterImageView);
-
-        mSynopsisTextView.setText(mMovie.getOverview());
 
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        setInitialFavoriteButtonState();
 
-        mFavoriteFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                /*
-                 * A filled in star represents the state where the user has made the movie a
-                 * favorite. If the user clicks on a filled in star they are initiating a request
-                 * to remove the movie from the database of favorites.
-                 *
-                 * Conversely, an unfilled star represents the state where the movie is not a user
-                 * favorite. A click on an unfilled start initiates a request to add the movie
-                 * to the database of favorites.
-                 */
-                if (mFavoriteFab.getTag().equals(getResources().getString(R.string.star))){
-                    removeFavoriteMovie();
-                }else{
-
-                    addFavoriteMovie();
-                }
-            }
-        });
 
         Button retryButton = view.findViewById(R.id.error_btn_retry);
 
@@ -396,12 +393,65 @@ public class MovieFragment extends Fragment  {
             }
         });
 
+
+
+
+        mFavoriteFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                /*
+                 * A filled in star represents the state where the user has made the movie a
+                 * favorite. If the user clicks on a filled in star they are initiating a request
+                 * to remove the movie from the database of favorites.
+                 *
+                 * Conversely, an unfilled star represents the state where the movie is not a user
+                 * favorite. A click on an unfilled start initiates a request to add the movie
+                 * to the database of favorites.
+                 */
+                if (mFavoriteFab.getTag().equals(getResources().getString(R.string.star))){
+                    removeFavoriteMovie();
+                }else{
+
+                    addFavoriteMovie();
+                }
+            }
+        });
+
+
+
         setupTrailerAdapter();
         setupReviewAdapter();
         setupTrailerVisibility();
         setupReviewVisibility();
         mRootView = view;
         return view;
+    }
+
+    private void updateView(){
+
+        mTitleTextView.setText(mMovie.getTitle());
+
+        mReleaseDateTextView.setText(mMovie.getReleaseDate());
+
+        DecimalFormat decimalFormat = new DecimalFormat("#.00");
+
+        mVoterAverageTextView.setText(decimalFormat.format(mMovie.getVoteAverage()));
+
+        mPopularityTextView.setText(decimalFormat.format(mMovie.getPopularity()));
+
+        if (mMovie.getPosterImage() == null) {
+            String imagePath = MovieFetcher.getPosterPathURL(mMovie.getPosterPath());
+            Picasso.with(getContext()).load(imagePath).into(mPosterImageView);
+        }else{
+            mPosterImageView.setImageBitmap(mMovie.getPosterImage());
+        }
+
+        mSynopsisTextView.setText(mMovie.getOverview());
+
+        setInitialFavoriteButtonState();
+
+
     }
 
     /**

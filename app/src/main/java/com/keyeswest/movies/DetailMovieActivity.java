@@ -15,10 +15,17 @@ public class DetailMovieActivity extends SingleFragmentActivity {
     private static final String TAG = "DetailMovieActivity";
 
     private static final String EXTRA_MOVIE = "com.keyeswest.movies.movie";
+    private static final String EXTRA_MOVIE_ID = "com.keyeswest.movies.movieId";
 
     public static Intent newIntent(Context context, Movie movie){
         Intent intent = new Intent(context, DetailMovieActivity.class);
         intent.putExtra(EXTRA_MOVIE, movie);
+        return intent;
+    }
+
+    public static Intent newIntent(Context context, long movieId){
+        Intent intent = new Intent(context, DetailMovieActivity.class);
+        intent.putExtra(EXTRA_MOVIE_ID, movieId);
         return intent;
     }
 
@@ -38,8 +45,14 @@ public class DetailMovieActivity extends SingleFragmentActivity {
 
 
         //TODO error handling - what if there is no intent?
+
         Movie movie = getIntent().getParcelableExtra(EXTRA_MOVIE);
 
+        if (movie == null){
+            long movieId = getIntent().getLongExtra(EXTRA_MOVIE_ID,0);
+            return MovieFragment.newInstance(movieId);
+
+        }else{
 
         /* **** ATTRIBUTION ****
         *
@@ -52,6 +65,8 @@ public class DetailMovieActivity extends SingleFragmentActivity {
         *
         */
         return MovieFragment.newInstance(movie);
+        }
+
     }
 
 
