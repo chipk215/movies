@@ -77,8 +77,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder>
             String posterPath = movieItem.getPosterPath();
             String imagePath = MovieFetcher.getPosterPathURL(posterPath);
             Log.i(TAG, imagePath);
-            Picasso.with(itemView.getContext()).load(imagePath).into(this);
-            itemView.setOnClickListener(new View.OnClickListener(){
+            if (movieItem.getPosterImage() == null) {
+                Picasso.with(itemView.getContext()).load(imagePath).into(this);
+
+            }else{
+                // movie from database contains the bitmap image of the poster
+                this.mItemImageView.setImageBitmap(movieItem.getPosterImage());
+            }
+
+            itemView.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View v) {

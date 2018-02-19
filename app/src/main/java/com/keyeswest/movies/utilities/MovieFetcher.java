@@ -11,12 +11,13 @@ import com.keyeswest.movies.interfaces.MovieFetcherCallback;
 import com.keyeswest.movies.models.Movie;
 
 import com.keyeswest.movies.models.Review;
+import com.keyeswest.movies.repos.MovieRepo;
 import com.keyeswest.movies.tasks.ListAsyncTask;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-
+import java.util.List;
 
 
 /**
@@ -46,9 +47,10 @@ public class MovieFetcher  {
     private MovieFetcherCallback mMoviesFetcherCallback;
     private MovieFetcherCallback mReviewsFetcherCallback;
 
-    private ListAsyncTask.ResultsCallback mResultsCallback;
 
     private final Context mContext;
+
+    private MovieListFragment.MovieFilter mCurrentMovieFilter;
 
     // Save the endpoint and page number for next page request
     private String mMovieEndpoint;
@@ -56,6 +58,8 @@ public class MovieFetcher  {
     private PageCounter mMoviePageCounter;
 
     private PageCounter mReviewPageCounter;
+
+    private MovieRepo mMovieRepo;
 
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -126,6 +130,7 @@ public class MovieFetcher  {
 
     public MovieFetcher(Context context){
         mContext = context;
+        mMovieRepo = new MovieRepo(context);
     }
 
     public static String getPosterPathURL(String posterPath){
@@ -160,16 +165,25 @@ public class MovieFetcher  {
      * @param filter - determines which endpoint to use e.g. popular or top rated
      * @param callback - client callback with movies
      */
-    public void fetchFirstMoviePage(MovieListFragment.MovieFilter filter, MovieFetcherCallback callback){
+    public void fetchFirstMoviePage(MovieListFragment.MovieFilter filter, final MovieFetcherCallback callback){
         Log.i(TAG, "fetchFirstMoviePage");
+        mCurrentMovieFilter = filter;
+        if (filter == MovieListFragment.MovieFilter.FAVORITE){
+            mMovieRepo.getAllMovies(new MovieRepo.QuerySetResult() {
+                @Override
+                public void movieResult(List<Movie> movies) {
+                    callback.updateList(movies);
+                }
+            });
+        }else {
+            mMoviesFetcherCallback = callback;
+            int requestPageNumber = 1;
+            setMovieEndpoint(filter);
 
-        mMoviesFetcherCallback = callback;
-        int requestPageNumber = 1;
-        setMovieEndpoint(filter);
-
-        URL moviesURL = buildMoviesURL(requestPageNumber);
-        mMoviePageCounter = new PageCounter();
-        new ListAsyncTask(mContext,new MovieResultsHandler(mMoviesFetcherCallback,mMoviePageCounter)).execute(moviesURL);
+            URL moviesURL = buildMoviesURL(requestPageNumber);
+            mMoviePageCounter = new PageCounter();
+            new ListAsyncTask(mContext, new MovieResultsHandler(mMoviesFetcherCallback, mMoviePageCounter)).execute(moviesURL);
+        }
     }
 
 
@@ -182,19 +196,22 @@ public class MovieFetcher  {
 
         Log.i(TAG, "fetchNextMoviePage");
 
-       // int lastPageFetched = mCurrentMoviePage;
-        int lastPageFetched = mMoviePageCounter.getCurrentPageNumber();
-        int nextPage = lastPageFetched + 1;
-        if (nextPage <= mMoviePageCounter.getTotalPages()){
-            Log.i(TAG, "fetching page: "+ nextPage);
-            URL moviesURL = buildMoviesURL(nextPage);
-            new ListAsyncTask(mContext,
-                    new MovieResultsHandler(mMoviesFetcherCallback,
-                            mMoviePageCounter)).execute(moviesURL);
-        }else {
+        if ((mCurrentMovieFilter == MovieListFragment.MovieFilter.POPULAR) ||
+                (mCurrentMovieFilter == MovieListFragment.MovieFilter.TOP_RATED) ) {
 
-            //return empty list if last page has been retrieved
-            mMoviesFetcherCallback.updateList(new ArrayList<Movie>());
+            int lastPageFetched = mMoviePageCounter.getCurrentPageNumber();
+            int nextPage = lastPageFetched + 1;
+            if (nextPage <= mMoviePageCounter.getTotalPages()) {
+                Log.i(TAG, "fetching page: " + nextPage);
+                URL moviesURL = buildMoviesURL(nextPage);
+                new ListAsyncTask(mContext,
+                        new MovieResultsHandler(mMoviesFetcherCallback,
+                                mMoviePageCounter)).execute(moviesURL);
+            } else {
+
+                //return empty list if last page has been retrieved
+                mMoviesFetcherCallback.updateList(new ArrayList<Movie>());
+            }
         }
     }
 

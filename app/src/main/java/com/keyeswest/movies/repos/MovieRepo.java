@@ -93,6 +93,14 @@ public class MovieRepo  {
 
     }
 
+    public void getAllMovies(QuerySetResult callback){
+        Bundle queryBundle = new Bundle();
+        queryBundle.putSerializable(OPERATION_KEY, Operations.QUERY_SET);
+        SqlTask sqlTask = new SqlTask(mContext);
+        sqlTask.setQuerySetResult(callback);
+        sqlTask.execute(queryBundle);
+    }
+
 
     //================================================================================
     // Delete

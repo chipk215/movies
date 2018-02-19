@@ -61,7 +61,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
     private boolean mShowFavoriteMenu;
 
     public enum MovieFilter{
-        POPULAR, TOP_RATED
+        POPULAR, TOP_RATED, FAVORITE
     }
 
     @BindView(R.id.movie_recycler_view) RecyclerView mMovieRecyclerView;
@@ -172,12 +172,15 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
         });
 
 
+
+
         setupMovieAdapter();
 
         // Can not start loading in onCreate because of the Progress Bar
         //   -- starting and stopping the spinner is problematic if the download is initiated
         //      in onCreate
         updateItems(true);
+
 
         return view;
 
@@ -243,6 +246,9 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
                 return true;
 
             case R.id.favorite_type:
+                subTitle = getContext().getResources().getString(R.string.favorite);
+                changeMovieData(MovieFilter.FAVORITE, subTitle);
+
                 return true;
 
             default:
@@ -260,6 +266,9 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
     @Override
     public void updateList(List<Movie> movieItemList) {
 
+        // movie data fetching has stopped so hide the progress bar
+        hideLoadingSpinner();
+
         if (mMovieRecyclerView.getVisibility() != View.VISIBLE){
             mMovieRecyclerView.setVisibility(View.VISIBLE);
         }
@@ -272,8 +281,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
             mMovieRecyclerView.getAdapter().notifyItemInserted(mItems.size()-1);
         }
 
-        // movie data fetching has stopped so hide the progress bar
-        hideLoadingSpinner();
+
     }
 
 
@@ -337,26 +345,29 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
                     super.onScrolled(recyclerView, dx, dy);
 
-                    RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+                    if (mCurrentFilter != MovieFilter.FAVORITE) {
 
-                    //current number of child views attached to the parent RecyclerView
-                    int visibleItemCount = layoutManager.getChildCount();
-                    Log.i(TAG,"visibleCount= " + visibleItemCount);
+                        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
 
-                    //number of items in the adapter bound to the parent RecyclerView
-                    int totalItemCount = layoutManager.getItemCount();
-                    Log.i(TAG,"totalItemCount= " + totalItemCount);
+                        //current number of child views attached to the parent RecyclerView
+                        int visibleItemCount = layoutManager.getChildCount();
+                        Log.i(TAG, "visibleCount= " + visibleItemCount);
 
-                    int firstVisibleItem = ((GridLayoutManager)layoutManager).findFirstVisibleItemPosition();
-                    Log.i(TAG,"firstVisibleItem= " + firstVisibleItem);
+                        //number of items in the adapter bound to the parent RecyclerView
+                        int totalItemCount = layoutManager.getItemCount();
+                        Log.i(TAG, "totalItemCount= " + totalItemCount);
 
-                    if ((totalItemCount - visibleItemCount) <= firstVisibleItem){
-                        Log.i(TAG, "Get next page...");
+                        int firstVisibleItem = ((GridLayoutManager) layoutManager).findFirstVisibleItemPosition();
+                        Log.i(TAG, "firstVisibleItem= " + firstVisibleItem);
 
-                        if (!mIsLoading){
+                        if ((totalItemCount - visibleItemCount) <= firstVisibleItem) {
+                            Log.i(TAG, "Get next page...");
 
-                            updateItems(false);
+                            if (!mIsLoading) {
 
+                                updateItems(false);
+
+                            }
                         }
                     }
                 }
@@ -377,18 +388,25 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
     private void updateItems(Boolean firstPage){
 
         mErrorLayout.setVisibility(View.GONE);
-        mIsLoading = true;
-        mLoadingSpinner.setVisibility(View.VISIBLE);
+
 
         if (firstPage){
-            mMovieFetcher.fetchFirstMoviePage(mCurrentFilter, this);
+
+            if (mItems.isEmpty()) {
+                mMovieFetcher.fetchFirstMoviePage(mCurrentFilter, this);
+                mIsLoading = true;
+                mLoadingSpinner.setVisibility(View.VISIBLE);
+            }
         }else{
             mMovieFetcher.fetchNextMoviePage();
+            mIsLoading = true;
+            mLoadingSpinner.setVisibility(View.VISIBLE);
         }
     }
 
     private void hideLoadingSpinner(){
         mLoadingSpinner.setVisibility(View.GONE);
+
         mIsLoading = false;
     }
 
