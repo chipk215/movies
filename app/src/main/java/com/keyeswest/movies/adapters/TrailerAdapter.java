@@ -56,7 +56,7 @@ public class TrailerAdapter  extends RecyclerView.Adapter<TrailerAdapter.Trailer
 
     class TrailerHolder  extends RecyclerView.ViewHolder{
 
-        @BindView(R.id.title_tv) TextView mTitleTextView;
+        @BindView(R.id.original_title_label) TextView mTitleTextView;
         @BindView(R.id.trailer_btn) ImageButton mPlayButton;
 
         TrailerHolder(LayoutInflater inflater, ViewGroup parent) {

@@ -91,7 +91,9 @@ public class MovieFragment extends Fragment  {
     private TrailerResults mTrailerHandler;
     private ReviewResults mReviewHandler;
 
-    @BindView(R.id.title_tv)TextView mTitleTextView;
+    @BindView(R.id.original_title_tv)TextView mOriginalTitleTextView;
+    @BindView(R.id.movie_title_tv)TextView mMovieTitleTextView;
+    @BindView(R.id.movie_title_label_tv)TextView mMovieTitleLabelTextView;
     @BindView(R.id.release_date_tv)TextView mReleaseDateTextView;
     @BindView(R.id.voter_average_tv)TextView mVoterAverageTextView;
     @BindView(R.id.popularity_tv)TextView mPopularityTextView;
@@ -337,7 +339,16 @@ public class MovieFragment extends Fragment  {
      */
     private void updateView(){
 
-        mTitleTextView.setText(mMovie.getTitle());
+        mOriginalTitleTextView.setText(mMovie.getOriginalTitle());
+
+        if (! mMovie.getTitle().equals(mMovie.getOriginalTitle())){
+            mMovieTitleTextView.setText(mMovie.getTitle());
+            mMovieTitleLabelTextView.setVisibility(View.VISIBLE);
+            mMovieTitleTextView.setVisibility(View.VISIBLE);
+        }else{
+            mMovieTitleLabelTextView.setVisibility(View.GONE);
+            mMovieTitleTextView.setVisibility(View.GONE);
+        }
 
         mReleaseDateTextView.setText(mMovie.getReleaseDate());
 
