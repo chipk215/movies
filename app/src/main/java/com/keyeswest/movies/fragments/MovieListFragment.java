@@ -47,12 +47,15 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
+import static android.app.Activity.RESULT_OK;
+
 
 public class MovieListFragment extends Fragment implements MovieFetcherCallback<Movie> {
 
     private static final String TAG = "MovieListFragment";
 
     private static final int NUMBER_COLUMNS = 3;
+    private static final int DETAIL_ACTIVITY = 200;
 
     private static final String SUB_TITLE_KEY = "subTitleKey";
 
@@ -304,6 +307,40 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
         hideLoadingSpinner();
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == DETAIL_ACTIVITY){
+            if (resultCode == RESULT_OK){
+
+                boolean wasRemoved = DetailMovieActivity.favoriteWasRemoved(data);
+                if (wasRemoved){
+                     long movieId = DetailMovieActivity.getMovieId(data);
+
+                     int index = findMovieInList(movieId);
+
+                     if (index != -1) {
+                         mItems.remove(index);
+                         mMovieRecyclerView.getAdapter().notifyItemRemoved(index);
+
+                     }
+                }
+            }
+        }
+
+    }
+
+
+    private int findMovieInList(long movieId){
+        int result = -1;
+
+        for (int i=0; i< mItems.size(); i++){
+            if (mItems.get(i).getId() == movieId){
+                return i;
+            }
+        }
+
+        return result;
+    }
 
 
     @Override
@@ -320,21 +357,24 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
             mMovieRecyclerView.setAdapter(new MovieAdapter(mItems, new MovieAdapter.OnItemClickListener() {
                 @Override
                 public void onItemClick(Movie movie) {
-                    Intent intent;
-                    if (mCurrentFilter == MovieFilter.FAVORITE){
-                        intent =DetailMovieActivity.newIntent(getContext(), movie.getId());
-
-                    }else{
-                        intent= DetailMovieActivity.newIntent(getContext(),movie);
-                    }
-
-
                     try{
-                        startActivity(intent);
+                        Intent intent;
+                        if (mCurrentFilter == MovieFilter.FAVORITE){
+                            intent =DetailMovieActivity.newIntent(getContext(), movie.getId());
+                            startActivityForResult(intent,DETAIL_ACTIVITY);
+
+                        }else{
+                            intent= DetailMovieActivity.newIntent(getContext(),movie);
+                            startActivity(intent);
+                        }
+
+
+
+
 
                     }catch (ActivityNotFoundException anf){
-                        Log.e(TAG, "Activity not found" + anf);
-                    }
+                            Log.e(TAG, "Activity not found" + anf);
+                        }
                 }
             }));
             mMovieRecyclerView.setItemAnimator(new DefaultItemAnimator());

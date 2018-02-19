@@ -15,7 +15,8 @@ public class DetailMovieActivity extends SingleFragmentActivity {
     private static final String TAG = "DetailMovieActivity";
 
     private static final String EXTRA_MOVIE = "com.keyeswest.movies.movie";
-    private static final String EXTRA_MOVIE_ID = "com.keyeswest.movies.movieId";
+    public static final String EXTRA_MOVIE_ID = "com.keyeswest.movies.movieId";
+    public static final String EXTRA_MOVIE_FAVORITE_REMOVED = "com.keyeswest.movies.favoriteRemoved";
 
     public static Intent newIntent(Context context, Movie movie){
         Intent intent = new Intent(context, DetailMovieActivity.class);
@@ -38,6 +39,24 @@ public class DetailMovieActivity extends SingleFragmentActivity {
         }
 
         return null;
+    }
+
+    public static long getMovieId(Intent intent){
+        if (intent != null){
+            long movieId = intent.getLongExtra(EXTRA_MOVIE_ID,0);
+            return movieId;
+        }
+
+        return 0;
+    }
+
+    public static boolean favoriteWasRemoved(Intent intent){
+        if (intent != null){
+            boolean wasRemoved = intent.getBooleanExtra(EXTRA_MOVIE_FAVORITE_REMOVED, false);
+            return wasRemoved;
+        }
+
+        return false;
     }
 
     @Override
@@ -68,6 +87,8 @@ public class DetailMovieActivity extends SingleFragmentActivity {
         }
 
     }
+
+
 
 
 }

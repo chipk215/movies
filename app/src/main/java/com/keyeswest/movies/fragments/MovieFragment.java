@@ -27,6 +27,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.keyeswest.movies.DetailMovieActivity;
 import com.keyeswest.movies.ErrorCondition;
 import com.keyeswest.movies.adapters.ReviewAdapter;
 import com.keyeswest.movies.interfaces.MovieFetcherCallback;
@@ -130,6 +131,14 @@ public class MovieFragment extends Fragment  {
     // movie repo for SQL access
     private MovieRepo mMovieRepo;
 
+    // favorites return an intent to the calling activity
+    private Boolean mIsFavorite;
+
+    // the intent returned to the calling activity if the user is viewing favorites
+    // the returned intent informs the calling activity if the user removed the favorite while
+    // in the detail view
+    private Intent mReturnIntent;
+
 
     /**
      * newInstance enables a fragment argument representing a movie to be used to initialize the
@@ -165,7 +174,7 @@ public class MovieFragment extends Fragment  {
      * Implements the MovieFetcherCall interface to obtain trailer data or
      * to handle errors that occurred during the fetch.
      */
-    private  class TrailerResults implements MovieFetcherCallback<Trailer>{
+    private class TrailerResults implements MovieFetcherCallback<Trailer>{
         @Override
         public void updateList(List<Trailer> trailers) {
 
@@ -302,7 +311,9 @@ public class MovieFragment extends Fragment  {
         Bundle bundle = getArguments();
         if (bundle != null){
             mMovie = bundle.getParcelable(ARG_MOVIE);
+            mIsFavorite = false;
             if (mMovie == null){
+                mIsFavorite = true;
                 mMovieId = bundle.getLong(ARG_MOVIE_ID);
             }
         }
@@ -334,6 +345,7 @@ public class MovieFragment extends Fragment  {
     }
 
 
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
@@ -347,6 +359,7 @@ public class MovieFragment extends Fragment  {
         if (mMovie != null){
             updateView();
         }else{
+
             // get the movie from the database
             mMovieRepo.getMovieById(mMovieId, new MovieRepo.QuerySetResult() {
                 @Override
@@ -354,6 +367,7 @@ public class MovieFragment extends Fragment  {
 
                     // or error checking
                     mMovie = movies.get(0);
+                    setReturnIntent(false);
                     updateView();
 
                 }
@@ -363,8 +377,6 @@ public class MovieFragment extends Fragment  {
 
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-
 
         Button retryButton = view.findViewById(R.id.error_btn_retry);
 
@@ -392,8 +404,6 @@ public class MovieFragment extends Fragment  {
 
             }
         });
-
-
 
 
         mFavoriteFab.setOnClickListener(new View.OnClickListener() {
@@ -427,6 +437,9 @@ public class MovieFragment extends Fragment  {
         mRootView = view;
         return view;
     }
+
+
+
 
     private void updateView(){
 
@@ -513,6 +526,21 @@ public class MovieFragment extends Fragment  {
             }
         });
 
+        setReturnIntent(true);
+
+    }
+
+
+    private void  setReturnIntent(boolean removeFavorite){
+        if (mIsFavorite){
+            if (mReturnIntent == null){
+                mReturnIntent =  DetailMovieActivity.newIntent(getContext(),mMovie.getId());
+            }
+            mReturnIntent.putExtra(DetailMovieActivity.EXTRA_MOVIE_FAVORITE_REMOVED ,removeFavorite);
+
+            getActivity().setResult(Activity.RESULT_OK, mReturnIntent);
+
+        }
     }
 
 
@@ -553,6 +581,8 @@ public class MovieFragment extends Fragment  {
 
             }
         });
+
+        setReturnIntent(false);
     }
 
 
