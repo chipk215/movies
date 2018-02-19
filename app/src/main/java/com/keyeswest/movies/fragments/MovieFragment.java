@@ -12,6 +12,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -263,7 +264,13 @@ public class MovieFragment extends Fragment  {
 
 
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        //Attribution: https://stackoverflow.com/a/41201865/9128441
+        mTrailerRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity,
+                DividerItemDecoration.VERTICAL));
+
         mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mReviewRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity,
+                DividerItemDecoration.VERTICAL));
 
         Button retryButton = view.findViewById(R.id.error_btn_retry);
 
