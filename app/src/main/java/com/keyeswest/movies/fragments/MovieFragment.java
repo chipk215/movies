@@ -168,133 +168,6 @@ public class MovieFragment extends Fragment  {
         return fragment;
     }
 
-
-    /**
-     * Handles the trailer data fetched asynchronously from theMovieDB site.
-     * Implements the MovieFetcherCall interface to obtain trailer data or
-     * to handle errors that occurred during the fetch.
-     */
-    private class TrailerResults implements MovieFetcherCallback<Trailer>{
-        @Override
-        public void updateList(List<Trailer> trailers) {
-
-
-            mParentLayout.setVisibility(View.VISIBLE);
-            mErrorLayout.setVisibility(View.GONE);
-
-            mFailedOperation = null;
-
-            mTrailers.addAll(trailers);
-            mTrailerLoadingSpinner.setVisibility(View.GONE);
-
-            // configure the UI depending upon whether there is any trailer data to display
-            if (trailers.isEmpty()){
-
-                // no trailer data so display a no trailer message to the user
-                String message = mNoTrailersTextView.getText().toString();
-                message = mMovie.getTitle() + " " + message;
-                mNoTrailersTextView.setText(message);
-                // Show the no trailer message
-                mNoTrailersTextView.setVisibility(View.VISIBLE);
-
-                // Hide the trailer list view
-                mTrailerRecyclerView.setVisibility(View.GONE);
-
-
-            }else{
-                // display the trailer data and notify the adapter there is no data
-                mTrailerRecyclerView.setVisibility(View.VISIBLE);
-                mTrailerRecyclerView.getAdapter().notifyItemInserted(mTrailers.size()-1);
-            }
-        }
-
-        @Override
-        public void downloadErrorOccurred(ErrorCondition errorMessage) {
-            Log.e(TAG,"Error fetching trailers: " + errorMessage);
-
-            switch (errorCondition){
-                case NETWORK_CONNECTIVITY:
-
-                    if(mErrorLayout.getVisibility() == View.GONE){
-                        mErrorText.setText(getResources().getString(R.string.internet_error));
-                        mTrailerLoadingSpinner.setVisibility(View.GONE);
-                        mErrorLayout.setVisibility(View.VISIBLE);
-                        mParentLayout.setVisibility(View.GONE);
-                        mFailedOperation = NetworkOperations.TRAILER;
-                    }
-
-                    break;
-            }
-
-        }
-    }
-
-
-    /**
-     * Handles the review data fetched asynchronously from theMovieDB site.
-     * Implements the MovieFetcherCall interface to obtain review data or
-     * to handle errors that occurred during the fetch.
-     */
-    private class ReviewResults implements MovieFetcherCallback<Review>{
-
-        @Override
-        public void updateList(List<Review> itemList) {
-            Log.i(TAG, "Updating Reviews");
-
-            mFailedOperation = null;
-
-            mParentLayout.setVisibility(View.VISIBLE);
-            mErrorLayout.setVisibility(View.GONE);
-
-            mReviews.addAll(itemList);
-            mReviewLoadingSpinner.setVisibility(View.GONE);
-            mReviewIsLoading = false;
-
-            // configure the UI depending upon whether there is any review data to display
-            if (mReviews.isEmpty()){
-                // craft the no review message for the user
-                String message = mNoReviewsTextView.getText().toString();
-                message = mMovie.getTitle() + " " + message;
-                mNoReviewsTextView.setText(message);
-                mNoReviewsTextView.setVisibility(View.VISIBLE);
-                //hide the review list
-                mReviewRecyclerView.setVisibility(View.GONE);
-
-            }else{
-                if (! itemList.isEmpty()) {
-                    // update the list and show the trailer data to the user.
-                    mReviewRecyclerView.getAdapter().notifyItemInserted(mReviews.size() - 1);
-
-                    // scroll the screen a bit to show trailer data in case all of the trailer items
-                    // are off screen
-                    showReviewsWithNudge();
-                }
-            }
-        }
-
-
-        @Override
-        public void downloadErrorOccurred(ErrorCondition errorMessage) {
-            Log.e(TAG, "Review Download error occurred" + errorMessage);
-            switch (errorCondition){
-                case NETWORK_CONNECTIVITY:
-
-                    if(mErrorLayout.getVisibility() == View.GONE){
-                        mErrorText.setText(getResources().getString(R.string.internet_error));
-                        mReviewLoadingSpinner.setVisibility(View.GONE);
-                        mErrorLayout.setVisibility(View.VISIBLE);
-                        mParentLayout.setVisibility(View.GONE);
-                        mFailedOperation = NetworkOperations.REVIEW;
-                    }
-
-                    break;
-            }
-
-        }
-    }
-
-
-
     /**
      *  In conjunction with the construction of the fragment using newInstance, fragment arguments
      *  are retrieved and used to initialize the movie fragment.
@@ -308,11 +181,19 @@ public class MovieFragment extends Fragment  {
 
         mMovieRepo = new MovieRepo(getContext());
 
+        //process the fragment arguments
         Bundle bundle = getArguments();
+
         if (bundle != null){
+
+            // determine if a movie object or movieId was provided as an argument
             mMovie = bundle.getParcelable(ARG_MOVIE);
             mIsFavorite = false;
             if (mMovie == null){
+
+                // A movie object was not passed so must be a movieId corresponding to a
+                // favorite item. The favorite movie will be retrieved from the database in
+                // onCreateView
                 mIsFavorite = true;
                 mMovieId = bundle.getLong(ARG_MOVIE_ID);
             }
@@ -357,17 +238,23 @@ public class MovieFragment extends Fragment  {
         mUnbinder = ButterKnife.bind(this, view);
 
         if (mMovie != null){
+            // update the view with the movie object passed to the fragment
             updateView();
         }else{
 
-            // get the movie from the database
+            // get the favorite movie from the database
             mMovieRepo.getMovieById(mMovieId, new MovieRepo.QuerySetResult() {
                 @Override
                 public void movieResult(List<Movie> movies) {
 
                     // or error checking
                     mMovie = movies.get(0);
+
+                    // initialize the intent to return to the calling activity indicating the
+                    // user did not un-favor the movie
                     setReturnIntent(false);
+
+                    // update view with movie favorite information
                     updateView();
 
                 }
@@ -428,8 +315,6 @@ public class MovieFragment extends Fragment  {
             }
         });
 
-
-
         setupTrailerAdapter();
         setupReviewAdapter();
         setupTrailerVisibility();
@@ -440,7 +325,9 @@ public class MovieFragment extends Fragment  {
 
 
 
-
+    /*
+     * Update the view with movie information
+     */
     private void updateView(){
 
         mTitleTextView.setText(mMovie.getTitle());
@@ -464,10 +351,10 @@ public class MovieFragment extends Fragment  {
 
         setInitialFavoriteButtonState();
 
-
     }
 
-    /**
+
+    /*
      * Check the database and see if the movie is a favorite.
      * If so set the fab image to a filled in star, otherwise an unfilled star.
      */
@@ -489,7 +376,7 @@ public class MovieFragment extends Fragment  {
     }
 
 
-    /**
+    /*
      * Removes movie from database of favorites.
      */
     private void removeFavoriteMovie(){
@@ -530,18 +417,6 @@ public class MovieFragment extends Fragment  {
 
     }
 
-
-    private void  setReturnIntent(boolean removeFavorite){
-        if (mIsFavorite){
-            if (mReturnIntent == null){
-                mReturnIntent =  DetailMovieActivity.newIntent(getContext(),mMovie.getId());
-            }
-            mReturnIntent.putExtra(DetailMovieActivity.EXTRA_MOVIE_FAVORITE_REMOVED ,removeFavorite);
-
-            getActivity().setResult(Activity.RESULT_OK, mReturnIntent);
-
-        }
-    }
 
 
     /**
@@ -586,7 +461,24 @@ public class MovieFragment extends Fragment  {
     }
 
 
-    /**
+    /*
+     * Update the intent being returned to the calling activity to reflect whether the user
+     * unfavored the movie or not.
+     */
+    private void  setReturnIntent(boolean removeFavorite){
+        if (mIsFavorite){
+            if (mReturnIntent == null){
+                mReturnIntent =  DetailMovieActivity.newIntent(getContext(),mMovie.getId());
+            }
+            mReturnIntent.putExtra(DetailMovieActivity.EXTRA_MOVIE_FAVORITE_REMOVED ,removeFavorite);
+
+            getActivity().setResult(Activity.RESULT_OK, mReturnIntent);
+
+        }
+    }
+
+
+    /*
      * If the user clicks the fab before the previous message has vanished then cancel the current
      * toast.
      * @param resId - resource id of message to be displayed
@@ -898,5 +790,134 @@ public class MovieFragment extends Fragment  {
         mParentLayout.setVisibility(View.VISIBLE);
         mFailedOperation = null;
         mFailedImplicitIntent = null;
+    }
+
+
+
+
+    /**
+     * Handles the review data fetched asynchronously from theMovieDB site.
+     * Implements the MovieFetcherCall interface to obtain review data or
+     * to handle errors that occurred during the fetch.
+     */
+    private class ReviewResults implements MovieFetcherCallback<Review>{
+
+        @Override
+        public void updateList(List<Review> itemList) {
+            Log.i(TAG, "Updating Reviews");
+
+            mFailedOperation = null;
+
+            mParentLayout.setVisibility(View.VISIBLE);
+            mErrorLayout.setVisibility(View.GONE);
+
+            mReviews.addAll(itemList);
+            mReviewLoadingSpinner.setVisibility(View.GONE);
+            mReviewIsLoading = false;
+
+            // configure the UI depending upon whether there is any review data to display
+            if (mReviews.isEmpty()){
+                // craft the no review message for the user
+                String message = mNoReviewsTextView.getText().toString();
+                message = mMovie.getTitle() + " " + message;
+                mNoReviewsTextView.setText(message);
+                mNoReviewsTextView.setVisibility(View.VISIBLE);
+                //hide the review list
+                mReviewRecyclerView.setVisibility(View.GONE);
+
+            }else{
+                if (! itemList.isEmpty()) {
+                    // update the list and show the trailer data to the user.
+                    mReviewRecyclerView.getAdapter().notifyItemInserted(mReviews.size() - 1);
+
+                    // scroll the screen a bit to show trailer data in case all of the trailer items
+                    // are off screen
+                    showReviewsWithNudge();
+                }
+            }
+        }
+
+
+        @Override
+        public void downloadErrorOccurred(ErrorCondition errorMessage) {
+            Log.e(TAG, "Review Download error occurred" + errorMessage);
+            switch (errorCondition){
+                case NETWORK_CONNECTIVITY:
+
+                    if(mErrorLayout.getVisibility() == View.GONE){
+                        mErrorText.setText(getResources().getString(R.string.internet_error));
+                        mReviewLoadingSpinner.setVisibility(View.GONE);
+                        mErrorLayout.setVisibility(View.VISIBLE);
+                        mParentLayout.setVisibility(View.GONE);
+                        mFailedOperation = NetworkOperations.REVIEW;
+                    }
+
+                    break;
+            }
+
+        }
+    }
+
+
+
+
+    /**
+     * Handles the trailer data fetched asynchronously from theMovieDB site.
+     * Implements the MovieFetcherCall interface to obtain trailer data or
+     * to handle errors that occurred during the fetch.
+     */
+    private class TrailerResults implements MovieFetcherCallback<Trailer>{
+        @Override
+        public void updateList(List<Trailer> trailers) {
+
+
+            mParentLayout.setVisibility(View.VISIBLE);
+            mErrorLayout.setVisibility(View.GONE);
+
+            mFailedOperation = null;
+
+            mTrailers.addAll(trailers);
+            mTrailerLoadingSpinner.setVisibility(View.GONE);
+
+            // configure the UI depending upon whether there is any trailer data to display
+            if (trailers.isEmpty()){
+
+                // no trailer data so display a no trailer message to the user
+                String message = mNoTrailersTextView.getText().toString();
+                message = mMovie.getTitle() + " " + message;
+                mNoTrailersTextView.setText(message);
+                // Show the no trailer message
+                mNoTrailersTextView.setVisibility(View.VISIBLE);
+
+                // Hide the trailer list view
+                mTrailerRecyclerView.setVisibility(View.GONE);
+
+
+            }else{
+                // display the trailer data and notify the adapter there is no data
+                mTrailerRecyclerView.setVisibility(View.VISIBLE);
+                mTrailerRecyclerView.getAdapter().notifyItemInserted(mTrailers.size()-1);
+            }
+        }
+
+        @Override
+        public void downloadErrorOccurred(ErrorCondition errorMessage) {
+            Log.e(TAG,"Error fetching trailers: " + errorMessage);
+
+            switch (errorCondition){
+                case NETWORK_CONNECTIVITY:
+
+                    if(mErrorLayout.getVisibility() == View.GONE){
+                        mErrorText.setText(getResources().getString(R.string.internet_error));
+                        mTrailerLoadingSpinner.setVisibility(View.GONE);
+                        mErrorLayout.setVisibility(View.VISIBLE);
+                        mParentLayout.setVisibility(View.GONE);
+                        mFailedOperation = NetworkOperations.TRAILER;
+                    }
+
+                    break;
+            }
+
+        }
     }
 }
