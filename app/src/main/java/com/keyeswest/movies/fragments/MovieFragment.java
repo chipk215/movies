@@ -341,6 +341,7 @@ public class MovieFragment extends Fragment  {
 
         mOriginalTitleTextView.setText(mMovie.getOriginalTitle());
 
+        // show movie title if different than original title
         if (! mMovie.getTitle().equals(mMovie.getOriginalTitle())){
             mMovieTitleTextView.setText(mMovie.getTitle());
             mMovieTitleLabelTextView.setVisibility(View.VISIBLE);
