@@ -258,6 +258,11 @@ public class MovieFragment extends Fragment  {
         if (mMovie != null){
             // update the view with the movie object passed to the fragment
             updateView();
+            // after a rotation we will also be in this code path
+            // see if the movie is still in the favorites database
+            if (mReturnIntent != null){
+                getActivity().setResult(Activity.RESULT_OK, mReturnIntent);
+            }
         }else{
 
             // get the favorite movie from the database
