@@ -25,6 +25,7 @@ import java.util.List;
 import static com.keyeswest.movies.repos.MovieRepo.MOVIE_ID_KEY;
 import static com.keyeswest.movies.repos.MovieRepo.MOVIE_KEY;
 import static com.keyeswest.movies.repos.MovieRepo.OPERATION_KEY;
+import static com.keyeswest.movies.repos.MovieRepo.PROJECTION_ARGS_KEY;
 import static com.keyeswest.movies.repos.MovieRepo.SELECTION_ARGS_KEY;
 import static com.keyeswest.movies.repos.MovieRepo.SELECTION_CLAUSE_KEY;
 
@@ -60,7 +61,7 @@ public class SqlTask extends AsyncTask<Bundle,Void,SqlResult> {
             // retrieve the bundled content provider arguments
             String selectionClause = args.getString(SELECTION_CLAUSE_KEY);
             String[] selectionArgs = args.getStringArray(SELECTION_ARGS_KEY);
-
+            String[] projectionArgs = args.getStringArray(PROJECTION_ARGS_KEY);
             // the SL operation to perform
             MovieRepo.Operations operation = (MovieRepo.Operations) args.get(OPERATION_KEY);
 
@@ -82,7 +83,7 @@ public class SqlTask extends AsyncTask<Bundle,Void,SqlResult> {
                     Cursor cursor = mContext.getContentResolver().query(
                             MovieContract.MovieTable.CONTENT_URI,
                                 /* Columns; leaving this null returns every column in the table */
-                            null,
+                            projectionArgs,
                                 /* Optional specification for columns in the projection clause above */
                             selectionClause,
                                 /* Values for "where" clause */

@@ -17,6 +17,7 @@ public class MovieRepo  {
 
     public static final String SELECTION_CLAUSE_KEY = "SELECTION_CLAUSE_KEY";
     public static final String SELECTION_ARGS_KEY = "SELECTION_ARGS_KEY";
+    public static final String PROJECTION_ARGS_KEY = "PROJECTION_ARGS_KEY";
     public static final String OPERATION_KEY = "OPERATION_KEY";
     public static final String MOVIE_KEY = "MOVIE_KEY";
     public static final String MOVIE_ID_KEY = "MOVIE_ID_KEY";
@@ -58,7 +59,7 @@ public class MovieRepo  {
     //================================================================================
     public void addMovie(Movie movie,  InsertResult callback){
 
-        //TODO first check that movie is not in database
+        //Consider first checking that movie is not in database prior to insertion
 
 
         Bundle queryBundle = new Bundle();
@@ -81,9 +82,15 @@ public class MovieRepo  {
         String selectionClause = MovieContract.MovieTable.COLUMN_MOVIE_ID + "=  ?";
         String[] selectionArgs = { Long.toString(movieId) };
 
+        // request only the id field
+        String[] projection={
+                MovieContract.MovieTable.COLUMN_MOVIE_ID
+        };
+
         Bundle queryBundle = new Bundle();
         queryBundle.putString(SELECTION_CLAUSE_KEY, selectionClause);
         queryBundle.putStringArray(SELECTION_ARGS_KEY, selectionArgs);
+        queryBundle.putStringArray(PROJECTION_ARGS_KEY, projection);
         queryBundle.putSerializable(OPERATION_KEY, Operations.QUERY_SET);
 
         SqlTask sqlTask = new SqlTask(mContext);
