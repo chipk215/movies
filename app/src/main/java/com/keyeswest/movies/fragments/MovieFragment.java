@@ -52,6 +52,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 
+@SuppressWarnings("ConstantConditions")
 public class MovieFragment extends Fragment  {
     private static final String TAG = "MovieFragment";
     private static final String ARG_MOVIE = "movie_arg";
@@ -122,7 +123,7 @@ public class MovieFragment extends Fragment  {
     @BindView(R.id.movie_detail_layout) CoordinatorLayout mParentLayout;
 
     // true when loading a review
-    boolean mReviewIsLoading;
+    private boolean mReviewIsLoading;
 
     // reference to top level view to access scrollview for programmatic adjustment
     private View mRootView;
@@ -131,8 +132,7 @@ public class MovieFragment extends Fragment  {
     private Unbinder mUnbinder;
 
     // stash the context and activity for convenience
-    Context mContext;
-    Activity mActivity;
+    private Context mContext;
 
     // movie repo for SQL access
     private MovieRepo mMovieRepo;
@@ -238,7 +238,7 @@ public class MovieFragment extends Fragment  {
                              Bundle savedInstanceState){
 
         mContext = getContext();
-        mActivity = getActivity();
+        Activity activity = getActivity();
 
         View view = inflater.inflate(R.layout.movie_detail_fragment, container, false);
         mUnbinder = ButterKnife.bind(this, view);
@@ -284,11 +284,11 @@ public class MovieFragment extends Fragment  {
 
         //Attribution: https://stackoverflow.com/a/41201865/9128441
         // list item delimiter
-        mTrailerRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity,
+        mTrailerRecyclerView.addItemDecoration(new DividerItemDecoration(activity,
                 DividerItemDecoration.VERTICAL));
 
         mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mReviewRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity,
+        mReviewRecyclerView.addItemDecoration(new DividerItemDecoration(activity,
                 DividerItemDecoration.VERTICAL));
 
         // Retry button for network connectivity issues
@@ -800,21 +800,15 @@ public class MovieFragment extends Fragment  {
     }
 
     private boolean isReviewHidden(){
-        if ((mReviewRecyclerView.getVisibility() == View.GONE) &&
-            (mNoReviewsTextView.getVisibility() == View.GONE)){
-            return true;
-        }
+        return (mReviewRecyclerView.getVisibility() == View.GONE) &&
+                (mNoReviewsTextView.getVisibility() == View.GONE);
 
-        return false;
     }
 
     private boolean isTrailerHidden(){
-        if ((mTrailerRecyclerView.getVisibility() == View.GONE) &&
-                (mNoTrailersTextView.getVisibility() == View.GONE)){
-            return true;
-        }
+        return (mTrailerRecyclerView.getVisibility() == View.GONE) &&
+                (mNoTrailersTextView.getVisibility() == View.GONE);
 
-        return false;
     }
 
 
