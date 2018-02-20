@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 
 //TODO revisit and figure out how to implement this without using InstrumentationTestCase
+// I need to learn how to use the Rules based testing
 @RunWith(AndroidJUnit4.class)
 public class MovieFetcherTest extends InstrumentationTestCase {
 

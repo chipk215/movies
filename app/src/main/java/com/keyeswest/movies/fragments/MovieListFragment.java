@@ -55,18 +55,27 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
     private static final String TAG = "MovieListFragment";
 
+    // In the future figure out how to choose columns based upon display size and orientation
     private static final int NUMBER_COLUMNS = 3;
+
+    // random number to identify fragment results expected from movie detail activity
     private static final int DETAIL_ACTIVITY = 200;
 
+    // Used to restore subtitle on rotation
     private static final String SUB_TITLE_KEY = "subTitleKey";
 
+    // true when loading items from the cloud
     private boolean mIsLoading = false;
 
+    // state variable indicating whether favorite menu item should be displayed (only if favorites
+    // have been saved
     private boolean mShowFavoriteMenu;
 
+    // Defines the available filtered views of the movie list fragment
     public enum MovieFilter{
         POPULAR, TOP_RATED, FAVORITE
     }
+
 
     @BindView(R.id.movie_recycler_view) RecyclerView mMovieRecyclerView;
 
@@ -123,6 +132,10 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
     }
 
+    /**
+     * Saves tool bar subtitle state during rotation
+     * @param outState - bundle with subtitle string
+     */
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState){
         super.onSaveInstanceState(outState);
@@ -132,7 +145,6 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
             String subTitle = mActionBar.getSubtitle().toString();
             outState.putString(SUB_TITLE_KEY, subTitle);
         }
-
     }
 
 
@@ -157,8 +169,13 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
         View view = inflater.inflate(R.layout.movie_list_fragment, container, false);
         mUnbinder = ButterKnife.bind(this, view);
 
+        // Hide the view which handles the scenario where the user un-favors the last favorite
+        // movie in the detail movie view and then returns to the list view.  This view
+        // is displayed instead of an empty list.
         mNoFavoritesView.setVisibility(View.GONE);
 
+        // Helper button to help the user move on to the Popular filter view if in the empty favorite
+        // scenario described above.
         mPopularButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,6 +184,8 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
             }
         });
 
+        // Helper button to help the user move on to the YTopRated filter view if in the empty favorite
+        // scenario described above.
         mTopRatedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -182,6 +201,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
         mMovieRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), NUMBER_COLUMNS));
 
+        // Retry button when network is unavailable
         Button retryButton = view.findViewById(R.id.error_btn_retry);
 
         retryButton.setOnClickListener(new View.OnClickListener() {
@@ -198,14 +218,12 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
             }
         });
 
-
         setupMovieAdapter();
 
         // Can not start loading in onCreate because of the Progress Bar
         //   -- starting and stopping the spinner is problematic if the download is initiated
         //      in onCreate
         updateItems(true);
-
 
         return view;
 
@@ -227,6 +245,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
             }
         });
     }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
@@ -261,14 +280,12 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
                 return true;
 
             case R.id.top_rated_type:
-
                 topRatedSelected();
                 return true;
 
             case R.id.favorite_type:
                 String subTitle = getContext().getResources().getString(R.string.favorite);
                 changeMovieData(MovieFilter.FAVORITE, subTitle);
-
                 return true;
 
             default:
@@ -319,8 +336,39 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
         // update the view only if movie data was fetched from MovieDB
         if ((movieItemList != null) && (! movieItemList.isEmpty())){
 
+            //-------------------------------------------------------------------------------------
+            // TL;DR
+            // My movie paging scheme is bad.
+            //-------------------------------
+            // I will definitely take a different approach in the future.
+            // Here is what's wrong, the recycler list provides an efficient mechanism for only
+            // creating a limited number of views yet the movieItemList in this implementation will
+            // grow to be the size of the movie list in the cloud since movies are simple appended
+            // onto the list as new pages are loaded as the user scrolls.
+            //
+            // The paging algorithm should be changed so that the movie list itself only holds perhaps
+            // three times the number of visible items that the recycler list supports. A third
+            // of the items should be the items needed for the previous page, a third for the
+            // currently visible items, and the final third cached for the next page.
+            //
+            // A sliding window should drop a third of the cached views whenever the user scrolls
+            // up or down and replace them with a page of views such that only 3 consecutive page views
+            // are held in the movie item list.  Deleting and adding views will also mitigate
+            // issues that arise when the server reorders the movie lists in response to updated
+            // popularity or voting feedback.  I've seen duplicates in my list because my list holds
+            // on to the cached movie data too long.
+            //
+            // I don't know how to compute the number of visible items the recycler list supports
+            // for a given layout but I think the computations could be done at run time.
+            //
+            // I'm pretty comfortable with algorithms so I'm postponing the implementation right
+            // now because there is so much Android specific content I need to get on with as part
+            // of this class. If the opportunity arises in the next project or the final project I'll
+            // tackle this.
+            //
             mItems.addAll(movieItemList);
             mMovieRecyclerView.getAdapter().notifyItemInserted(mItems.size()-1);
+
         }
 
     }
@@ -364,35 +412,35 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == DETAIL_ACTIVITY){
-            if (resultCode == RESULT_OK){
 
-                boolean wasRemoved = DetailMovieActivity.favoriteWasRemoved(data);
-                if (wasRemoved){
+        if ((requestCode == DETAIL_ACTIVITY) && (resultCode == RESULT_OK)){
 
-                    // remove it from the list of movies being displayed
-                    long movieId = DetailMovieActivity.getMovieId(data);
+            boolean wasRemoved = DetailMovieActivity.favoriteWasRemoved(data);
+            if (wasRemoved){
 
-                    int index = findMovieInList(movieId);
+                // remove it from the list of movies being displayed
+                long movieId = DetailMovieActivity.getMovieId(data);
 
-                    // -1 indicates the movie could not be found in the list, an unexpected error
-                    // condition
+                int index = findMovieInList(movieId);
 
-                    if (index != -1) {
+                // -1 indicates the movie could not be found in the list, an unexpected error
+                // condition
 
-                        // remove the movie from the list
-                        mItems.remove(index);
-                        mMovieRecyclerView.getAdapter().notifyItemRemoved(index);
+                if (index != -1) {
 
-                        if (mItems.isEmpty()){
+                    // remove the movie from the list
+                    mItems.remove(index);
+                    mMovieRecyclerView.getAdapter().notifyItemRemoved(index);
 
-                            // if after removing the favorite movie there are no more favorite
-                            // movies to show then display a no favorite message and guide
-                            // the user to viewing popular or top rated movies
-                            mNoFavoritesView.setVisibility(View.VISIBLE);
-                            mFavoriteItem.setVisible(false);
-                        }
+                    if (mItems.isEmpty()){
+
+                        // if after removing the favorite movie there are no more favorite
+                        // movies to show then display a no favorite message and guide
+                        // the user to viewing popular or top rated movies
+                        mNoFavoritesView.setVisibility(View.VISIBLE);
+                        mFavoriteItem.setVisible(false);
                     }
+
                 }
             }
         }
@@ -453,6 +501,8 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
 
                     super.onScrolled(recyclerView, dx, dy);
 
+                    // No paging for favorites pulled from database, we are currently returning all
+                    // the favorites in the db for simplicity.
                     if (mCurrentFilter != MovieFilter.FAVORITE) {
 
                         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
@@ -484,7 +534,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
     }
 
 
-    /**
+    /*
      * Initiates the fetching of paged movie data from MovieDB.
      *
      * @param firstPage - identifies whether the request is for first page data or if false to

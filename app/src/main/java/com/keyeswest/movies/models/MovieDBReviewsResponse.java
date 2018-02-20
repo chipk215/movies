@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
+// Helper class for gson parser. I hope we are passed manual json parsing :)
 public class MovieDBReviewsResponse {
 
     @SerializedName("id")

@@ -102,12 +102,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder>
 
         @Override
         public void onBitmapFailed(Drawable errorDrawable) {
-            // TODO:  provide an error icon, raise network connectivity dialog
 
-            // at this point the errorDrawable has not been set so we can't use it as a substitute
-
-            // internet connectivity failure here is a corner case since we just got the
-            // movie data with network error protection but this case should be handled
         }
 
         @Override

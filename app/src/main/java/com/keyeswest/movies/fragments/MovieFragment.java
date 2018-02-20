@@ -240,6 +240,18 @@ public class MovieFragment extends Fragment  {
         View view = inflater.inflate(R.layout.movie_detail_fragment, container, false);
         mUnbinder = ButterKnife.bind(this, view);
 
+        //-----------------------------------------------------------------------------------
+        // Another suspect decision...
+        //
+        // So in trying to leverage the detail view for favorites, I needed to return data to
+        // the calling activity when the calling activity is showing only favorites and the user
+        // un-favors the movie in this view. The calling activity needs to remove the un-favored
+        // movie from the display when the fragment returns. This is handled with a result but
+        // only for the favorites view.
+        //
+        // Probably should just be consistent and have both the favorites and non-favorite views
+        // return results.
+        //
         if (mMovie != null){
             // update the view with the movie object passed to the fragment
             updateView();
@@ -266,7 +278,9 @@ public class MovieFragment extends Fragment  {
 
 
         mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
         //Attribution: https://stackoverflow.com/a/41201865/9128441
+        // list item delimiter
         mTrailerRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity,
                 DividerItemDecoration.VERTICAL));
 
@@ -274,6 +288,7 @@ public class MovieFragment extends Fragment  {
         mReviewRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity,
                 DividerItemDecoration.VERTICAL));
 
+        // Retry button for network connectivity issues
         Button retryButton = view.findViewById(R.id.error_btn_retry);
 
         retryButton.setOnClickListener(new View.OnClickListener() {
@@ -511,7 +526,7 @@ public class MovieFragment extends Fragment  {
     }
 
 
-    /**
+    /*
      * Users can collapse or expand review data to unclutter the UI.
      * This method implements the logic for hiding and showing Reviews based upon the user
      * clicking the corresponding expand/collapse button on the screen.
@@ -561,7 +576,7 @@ public class MovieFragment extends Fragment  {
     }
 
 
-    /**
+    /*
      * Similar to reviews the trailers section is collapsible.
      */
     private void setupTrailerVisibility(){
@@ -623,8 +638,6 @@ public class MovieFragment extends Fragment  {
         if (intent.resolveActivity(getActivity().getPackageManager()) != null){
             startActivityWithIntent(intent);
         }
-
-        //TODO revisit and handle else clause if intent is not created
     }
 
     private void viewReview(String url){
@@ -634,8 +647,6 @@ public class MovieFragment extends Fragment  {
             if (intent.resolveActivity(getActivity().getPackageManager()) != null){
                 startActivityWithIntent(intent);
             }
-
-            //TODO revisit and handle else clause if intent is not created
         }
     }
 
@@ -701,10 +712,8 @@ public class MovieFragment extends Fragment  {
 
                         }
                     }
-
                 }
             });
-
         }
     }
 
@@ -784,7 +793,7 @@ public class MovieFragment extends Fragment  {
 
     }
 
-    /**
+    /*
      * Displays error message if network connectivity is lost prior to starting an implicit
      * intent activity like playing a trailer or viewing a review online
      * @param intent - the implicit intent
@@ -801,7 +810,7 @@ public class MovieFragment extends Fragment  {
     }
 
 
-    /**
+    /*
      * Clears the network error message if after network connectivity is re-established
      */
     private void clearNetworkErrorMessage(){
@@ -814,7 +823,7 @@ public class MovieFragment extends Fragment  {
 
 
 
-    /**
+    /*
      * Handles the review data fetched asynchronously from theMovieDB site.
      * Implements the MovieFetcherCall interface to obtain review data or
      * to handle errors that occurred during the fetch.
@@ -878,7 +887,7 @@ public class MovieFragment extends Fragment  {
     }
 
 
-    /**
+    /*
      * Handles the trailer data fetched asynchronously from theMovieDB site.
      * Implements the MovieFetcherCall interface to obtain trailer data or
      * to handle errors that occurred during the fetch.
@@ -931,10 +940,10 @@ public class MovieFragment extends Fragment  {
                         mParentLayout.setVisibility(View.GONE);
                         mFailedOperation = NetworkOperations.TRAILER;
                     }
-
+                    break;
+                default:
                     break;
             }
-
         }
     }
 }

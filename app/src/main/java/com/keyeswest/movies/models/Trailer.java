@@ -82,16 +82,8 @@ public class Trailer implements Parcelable {
         mId = id;
     }
 
-    public String getISO639() {
-        return mISO639;
-    }
-
     public void setISO639(String ISO639) {
         mISO639 = ISO639;
-    }
-
-    public String getISO3166() {
-        return mISO3166;
     }
 
     public void setISO3166(String ISO3166) {
@@ -114,10 +106,6 @@ public class Trailer implements Parcelable {
         mName = name;
     }
 
-    public String getSite() {
-        return mSite;
-    }
-
     public void setSite(String site) {
         mSite = site;
     }
@@ -128,10 +116,6 @@ public class Trailer implements Parcelable {
 
     public void setSize(int size) {
         mSize = size;
-    }
-
-    public String getType() {
-        return mType;
     }
 
     public void setType(String type) {

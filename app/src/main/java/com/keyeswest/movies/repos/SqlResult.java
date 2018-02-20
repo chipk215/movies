@@ -7,6 +7,7 @@ import com.keyeswest.movies.models.Movie;
 
 import java.util.List;
 
+//Used by SQLTask for executing async database queries
 public class SqlResult {
 
     private List<Movie> mMovies;

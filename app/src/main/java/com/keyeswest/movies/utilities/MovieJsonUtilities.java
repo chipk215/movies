@@ -48,6 +48,8 @@ public class MovieJsonUtilities {
 
         try{
 
+            //Some of the manual json processing is left over from Movie Part I
+
             // top level object
             JSONObject jsonObject = new JSONObject(jsonString);
 
@@ -63,7 +65,6 @@ public class MovieJsonUtilities {
 
             if(jsonObject.has(resultsField)){
 
-               // JSONArray results = jsonObject.getJSONArray(resultsField);
                 movieItems = MovieDBMoviesResponse.parseJSON(jsonString).getMovies();
             }
 

@@ -33,14 +33,6 @@ public class Review {
         mId = id;
     }
 
-    public String getAuthor() {
-        return mAuthor;
-    }
-
-    public void setAuthor(String author) {
-        mAuthor = author;
-    }
-
     public String getContent() {
         return mContent;
     }
@@ -53,7 +45,4 @@ public class Review {
         return mUrl;
     }
 
-    public void setUrl(String url) {
-        mUrl = url;
-    }
 }

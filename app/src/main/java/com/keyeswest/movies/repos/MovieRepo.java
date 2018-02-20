@@ -10,6 +10,7 @@ import com.keyeswest.movies.tasks.SqlTask;
 
 import java.util.List;
 
+// This could be converted to a generic base class if more database entities were to be defined
 
 public class MovieRepo  {
     private static final String TAG= "MovieRepo";
@@ -25,28 +26,35 @@ public class MovieRepo  {
 
     private Context mContext;
 
-
-
     public MovieRepo(Context context ){
         mContext = context;
 
     }
 
 
+    //================================================================================
+    // All of the database operations are performed asynchronously. These interfaces
+    // define the callbacks used to get the results back to the caller.
     public interface QuerySetResult {
+        // returns a list of movies (1 or more)
         void movieResult(List<Movie> movies);
     }
 
     public interface InsertResult {
+        // returns a uri for created movie records
         void movieResult(Uri movieUri);
     }
 
     public interface QueryCountResult {
+        // returns an integer count for queries that return a count
         void movieResult(int recordCount);
     }
+    //===============================================================================
+
+
 
     //================================================================================
-    // Create
+    // Create Operations
     //================================================================================
     public void addMovie(Movie movie,  InsertResult callback){
 
@@ -65,7 +73,7 @@ public class MovieRepo  {
 
 
     //================================================================================
-    // Read
+    // Read/Query Operations
     //================================================================================
     public void getMovieById(long movieId, QuerySetResult callback){
 
@@ -85,6 +93,7 @@ public class MovieRepo  {
     }
 
     public void getMovieCount( QueryCountResult callback){
+        //TODO use projection to only count ids
         Bundle queryBundle = new Bundle();
         queryBundle.putSerializable(OPERATION_KEY, Operations.QUERY_COUNT);
         SqlTask sqlTask = new SqlTask(mContext);
@@ -103,7 +112,7 @@ public class MovieRepo  {
 
 
     //================================================================================
-    // Delete
+    // Delete Operation
     //================================================================================
     public void deleteMovieById(long movieId, QueryCountResult callback){
         Bundle queryBundle = new Bundle();

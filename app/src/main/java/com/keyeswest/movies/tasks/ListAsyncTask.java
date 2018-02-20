@@ -2,8 +2,6 @@ package com.keyeswest.movies.tasks;
 
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -33,8 +31,6 @@ public class ListAsyncTask extends AsyncTask<URL, Void, String> {
     public ListAsyncTask(Context context, ResultsCallback resultsCallback) {
         mContext = context;
         mResultsCallback = resultsCallback;
-
-
     }
 
     @Override
@@ -68,14 +64,11 @@ public class ListAsyncTask extends AsyncTask<URL, Void, String> {
         try {
             jsonResults = NetworkUtilities.getResponseFromHttpUrl(dataURL);
             Log.i(TAG, jsonResults);
-            //move this to client... parsing requires knowledge of list type
             return jsonResults;
         }catch(IOException ie){
             Log.e(TAG, "Error retrieving movie data" + ie);
             return "";
         }
-
     }
-
 
 }
