@@ -62,6 +62,8 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
     // Used to restore subtitle on rotation
     private static final String SUB_TITLE_KEY = "subTitleKey";
 
+    private static final String NO_FAVORITE_MOVIES_KEY = "noFavoriteMovieKey";
+
     // true when loading items from the cloud
     private boolean mIsLoading = false;
 
@@ -144,6 +146,13 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
             outState.putString(SUB_TITLE_KEY, subTitle);
         }
 
+        if (mNoFavoritesView.getVisibility() != View.GONE ){
+            // display the no movie favorites view on rotation
+            outState.putBoolean(NO_FAVORITE_MOVIES_KEY, true);
+        }else{
+            outState.putBoolean(NO_FAVORITE_MOVIES_KEY, false);
+        }
+
         super.onSaveInstanceState(outState);
     }
 
@@ -161,9 +170,11 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
             subTitle = resources.getString(R.string.popular);
         }
 
+        boolean mShowNoFavoritesView = false;
         // overwrite the subtitle if reassigned during rotation
         if (savedInstanceState != null){
             subTitle= savedInstanceState.getString(SUB_TITLE_KEY, subTitle);
+            mShowNoFavoritesView = savedInstanceState.getBoolean(NO_FAVORITE_MOVIES_KEY, false);
         }
 
         View view = inflater.inflate(R.layout.movie_list_fragment, container, false);
@@ -172,7 +183,13 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
         // Hide the view which handles the scenario where the user un-favors the last favorite
         // movie in the detail movie view and then returns to the list view.  This view
         // is displayed instead of an empty list.
-        mNoFavoritesView.setVisibility(View.GONE);
+        if (mShowNoFavoritesView){
+            mNoFavoritesView.setVisibility(View.VISIBLE);
+            mFavoriteItem.setVisible(false);
+
+        }else {
+            mNoFavoritesView.setVisibility(View.GONE);
+        }
 
         // Helper button to help the user move on to the Popular filter view if in the empty favorite
         // scenario described above.
