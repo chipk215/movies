@@ -1,6 +1,5 @@
 package com.keyeswest.movies.fragments;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -27,7 +26,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.stetho.Stetho;
 import com.keyeswest.movies.DetailMovieActivity;
@@ -115,6 +113,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
+        //noinspection ConstantConditions
         Stetho.initializeWithDefaults(getContext());
         Log.i(TAG, "MovieListFragment onCreate");
 
@@ -198,6 +197,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
         //noinspection ConstantConditions
         mActionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
 
+        assert mActionBar != null;
         mActionBar.setSubtitle(subTitle);
 
         mMovieRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), NUMBER_COLUMNS));
@@ -237,11 +237,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
             @Override
             public void movieResult(int recordCount) {
                 Log.i(TAG, "Number of favorites= " + recordCount);
-                if (recordCount > 0){
-                    mShowFavoriteMenu = true;
-                }else{
-                    mShowFavoriteMenu = false;
-                }
+                mShowFavoriteMenu = recordCount > 0;
 
             }
         });
@@ -285,7 +281,7 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
                 return true;
 
             case R.id.favorite_type:
-                String subTitle = getContext().getResources().getString(R.string.favorite);
+                @SuppressWarnings("ConstantConditions") String subTitle = getContext().getResources().getString(R.string.favorite);
                 changeMovieData(MovieFilter.FAVORITE, subTitle);
                 return true;
 
