@@ -68,7 +68,7 @@ public class SqlTask extends AsyncTask<Bundle,Void,SqlResult> {
             // save the requested operation to use when handling results
             result.setSqlOperation(operation);
 
-            switch (operation) {
+            switch (operation != null ? operation : null) {
                 case CREATE:
                     //insert a movie
                     Movie movie = args.getParcelable(MOVIE_KEY);

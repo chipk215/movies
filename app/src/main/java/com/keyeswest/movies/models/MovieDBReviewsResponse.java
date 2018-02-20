@@ -41,10 +41,12 @@ public class MovieDBReviewsResponse {
     }
 
 
+    @SuppressWarnings("unused")
     public int getId() {
         return mId;
     }
 
+    @SuppressWarnings("unused")
     public void setId(int id) {
         mId = id;
     }
@@ -53,6 +55,7 @@ public class MovieDBReviewsResponse {
         return mPage;
     }
 
+    @SuppressWarnings("unused")
     public void setPage(int page) {
         mPage = page;
     }
@@ -61,14 +64,17 @@ public class MovieDBReviewsResponse {
         return mTotalPages;
     }
 
+    @SuppressWarnings("unused")
     public void setTotalPages(int totalPages) {
         mTotalPages = totalPages;
     }
 
+    @SuppressWarnings("unused")
     public int getTotalResults() {
         return mTotalResults;
     }
 
+    @SuppressWarnings("unused")
     public void setTotalResults(int totalResults) {
         mTotalResults = totalResults;
     }
@@ -77,6 +83,7 @@ public class MovieDBReviewsResponse {
         return mReviews;
     }
 
+    @SuppressWarnings("unused")
     public void setReviews(List<Review> reviews) {
         mReviews = reviews;
     }

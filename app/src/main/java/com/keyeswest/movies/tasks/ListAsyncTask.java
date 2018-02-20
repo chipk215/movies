@@ -1,6 +1,7 @@
 package com.keyeswest.movies.tasks;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.net.URL;
 
 
+@SuppressLint("StaticFieldLeak")
 public class ListAsyncTask extends AsyncTask<URL, Void, String> {
     final private static String TAG="ListAsyncTask";
 
@@ -38,7 +40,7 @@ public class ListAsyncTask extends AsyncTask<URL, Void, String> {
 
         // check network connectivity
         if (! NetworkUtilities.isNetworkAvailable(mContext)){
-            mResultsCallback.downloadErrorOccurred(ResultsCallback.errorCondition.NETWORK_CONNECTIVITY);
+            mResultsCallback.downloadErrorOccurred(ErrorCondition.NETWORK_CONNECTIVITY);
             cancel(true);
         }
     }

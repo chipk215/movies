@@ -13,6 +13,7 @@ import java.util.List;
 // This could be converted to a generic base class if more database entities were to be defined
 
 public class MovieRepo  {
+    @SuppressWarnings("unused")
     private static final String TAG= "MovieRepo";
 
     public static final String SELECTION_CLAUSE_KEY = "SELECTION_CLAUSE_KEY";
@@ -25,7 +26,7 @@ public class MovieRepo  {
     public enum Operations{ CREATE, QUERY_SET, QUERY_COUNT, UPDATE, DELETE}
 
 
-    private Context mContext;
+    private final Context mContext;
 
     public MovieRepo(Context context ){
         mContext = context;

@@ -48,6 +48,7 @@ public class Movie implements Parcelable {
 
     private List<Trailer> mTrailers;
 
+    @SuppressWarnings("unused")
     public static final Parcelable.Creator<Movie> CREATOR
             = new Parcelable.Creator<Movie>() {
 
