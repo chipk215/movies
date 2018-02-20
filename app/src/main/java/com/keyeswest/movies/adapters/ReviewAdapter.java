@@ -26,8 +26,8 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewHold
         void onItemClick(String reviewURL);
     }
 
-    private List<Review> mReviewList;
-    private OnFullReviewClickListener mReviewCallback;
+    private final List<Review> mReviewList;
+    private final OnFullReviewClickListener mReviewCallback;
 
 
     public ReviewAdapter(List<Review> reviewList, OnFullReviewClickListener fullReviewCallback){

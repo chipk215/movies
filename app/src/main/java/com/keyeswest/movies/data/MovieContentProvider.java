@@ -17,6 +17,7 @@ import static com.keyeswest.movies.data.MovieContract.MovieTable.TABLE_NAME;
 /**
  * Content provider for the locally hosted database of user selected movie favorites
  */
+@SuppressWarnings("ConstantConditions")
 public class MovieContentProvider  extends ContentProvider{
 
     //MOVIE represents the directory of movies
@@ -119,7 +120,7 @@ public class MovieContentProvider  extends ContentProvider{
 
         int match = sUriMatcher.match(uri);
 
-        int moviesDeleted = 0;
+        int moviesDeleted;
 
         switch(match){
             case MOVIE_WITH_ID:

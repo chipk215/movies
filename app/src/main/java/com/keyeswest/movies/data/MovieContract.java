@@ -11,6 +11,7 @@ public class MovieContract {
 
     public static final String AUTHORITY = "com.keyeswest.movies";
 
+    @SuppressWarnings("WeakerAccess")
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
     public static final String PATH_MOVIE = MovieTable.TABLE_NAME;
