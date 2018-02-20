@@ -138,13 +138,14 @@ public class MovieListFragment extends Fragment implements MovieFetcherCallback<
      */
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState){
-        super.onSaveInstanceState(outState);
 
         CharSequence title = mActionBar.getSubtitle();
         if (title != null){
             String subTitle = mActionBar.getSubtitle().toString();
             outState.putString(SUB_TITLE_KEY, subTitle);
         }
+
+        super.onSaveInstanceState(outState);
     }
 
 

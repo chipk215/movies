@@ -57,6 +57,9 @@ public class MovieFragment extends Fragment  {
     private static final String ARG_MOVIE = "movie_arg";
     private static final String ARG_MOVIE_ID = "movie_arg_id";
 
+    private static final String TRAILER_HIDDEN_KEY = "trailer_hidden_key";
+    private static final String REVIEW_HIDDEN_KEY = "review_hidden_key";
+
     private static final int NUDGE_VERTICAL_PIXELS = 400;
 
     // convenience properties holding resource strings
@@ -341,10 +344,33 @@ public class MovieFragment extends Fragment  {
 
         setupTrailerAdapter();
         setupReviewAdapter();
-        setupTrailerVisibility();
-        setupReviewVisibility();
+
+        boolean hideTrailers = true;
+        boolean hideReviews = true;
+
+        if (savedInstanceState != null){
+            hideTrailers = savedInstanceState.getBoolean(TRAILER_HIDDEN_KEY, true);
+            hideReviews = savedInstanceState.getBoolean(REVIEW_HIDDEN_KEY, true);
+        }
+
+        setupTrailerVisibility(hideTrailers);
+        setupReviewVisibility(hideReviews);
+
+
         mRootView = view;
         return view;
+    }
+
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState){
+
+        // save the expand/collapse state of the trailer and review sections
+        outState.putBoolean(TRAILER_HIDDEN_KEY, isTrailerHidden());
+        outState.putBoolean(REVIEW_HIDDEN_KEY, isReviewHidden());
+
+        super.onSaveInstanceState(outState);
+
     }
 
 
@@ -531,9 +557,15 @@ public class MovieFragment extends Fragment  {
      * This method implements the logic for hiding and showing Reviews based upon the user
      * clicking the corresponding expand/collapse button on the screen.
      */
-    private void setupReviewVisibility() {
-        // ensure the review section is initially collapsed
-        hideReview();
+    private void setupReviewVisibility(boolean hideReviews) {
+
+        if (hideReviews){
+            hideReview();
+            mShowReviewButton.setTag(mShow);
+        }else{
+            showReview();
+            mShowReviewButton.setTag(mHide);
+        }
 
         //handle toggling the review expand/collapse button
         mShowReviewButton.setOnClickListener(new View.OnClickListener() {
@@ -579,10 +611,17 @@ public class MovieFragment extends Fragment  {
     /*
      * Similar to reviews the trailers section is collapsible.
      */
-    private void setupTrailerVisibility(){
+    private void setupTrailerVisibility(boolean hideTrailers){
 
-        // initially hide the trailers
-        hideTrailer();
+        if (hideTrailers){
+            hideTrailer();
+            mShowTrailerButton.setTag(mShow);
+        }else{
+            showTrailer();
+            mShowTrailerButton.setTag(mHide);
+        }
+
+
 
         // handle toggling the expand/collapse button
         mShowTrailerButton.setOnClickListener(new View.OnClickListener() {
@@ -758,6 +797,24 @@ public class MovieFragment extends Fragment  {
         }else {
             showReviewsWithNudge();
         }
+    }
+
+    private boolean isReviewHidden(){
+        if ((mReviewRecyclerView.getVisibility() == View.GONE) &&
+            (mNoReviewsTextView.getVisibility() == View.GONE)){
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isTrailerHidden(){
+        if ((mTrailerRecyclerView.getVisibility() == View.GONE) &&
+                (mNoTrailersTextView.getVisibility() == View.GONE)){
+            return true;
+        }
+
+        return false;
     }
 
 
