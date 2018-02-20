@@ -218,6 +218,7 @@ public class SqlTask extends AsyncTask<Bundle,Void,SqlResult> {
         values.put(MovieContract.MovieTable.COLUMN_MOVIE_ID, movie.getId());
         values.put(MovieContract.MovieTable.COLUMN_ORIGINAL_TITLE, movie.getOriginalTitle());
         values.put(MovieContract.MovieTable.COLUMN_USER_RATING, movie.getVoteAverage());
+        values.put(MovieContract.MovieTable.COLUMN_POPULAR_RATING, movie.getPopularity());
         values.put(MovieContract.MovieTable.COLUMN_TITLE, movie.getTitle());
         values.put(MovieContract.MovieTable.COLUMN_POSTER, posterBytes);
         values.put(MovieContract.MovieTable.COLUMN_RELEASE_DATE, movie.getReleaseDate());

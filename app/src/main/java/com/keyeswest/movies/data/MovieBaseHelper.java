@@ -12,7 +12,7 @@ public class MovieBaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "MovieBase.db";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     public MovieBaseHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -33,6 +33,7 @@ public class MovieBaseHelper extends SQLiteOpenHelper {
                         MovieContract.MovieTable.COLUMN_POSTER + " BLOB," +
                         MovieContract.MovieTable.COLUMN_SYNOPSIS + " TEXT," +
                         MovieContract.MovieTable.COLUMN_USER_RATING + " REAL NOT NULL," +
+                        MovieContract.MovieTable.COLUMN_POPULAR_RATING + " REAL NOT NULL," +
                         // Save date as TEXT for now revisit if querying by TEXT date is not supported
                         MovieContract.MovieTable.COLUMN_RELEASE_DATE + " TEXT" +
                         "); ";

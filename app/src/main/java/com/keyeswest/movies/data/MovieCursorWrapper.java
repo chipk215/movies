@@ -36,6 +36,8 @@ public class MovieCursorWrapper extends CursorWrapper {
 
         String synopsis = getString(getColumnIndex(MovieContract.MovieTable.COLUMN_SYNOPSIS));
         float userRating = getFloat(getColumnIndex(MovieContract.MovieTable.COLUMN_USER_RATING));
+
+        float popularity = getFloat(getColumnIndex(MovieContract.MovieTable.COLUMN_POPULAR_RATING));
         String releaseDate = getString(getColumnIndex(MovieContract.MovieTable.COLUMN_RELEASE_DATE));
 
         Movie movie = new Movie(movieId);
@@ -45,6 +47,7 @@ public class MovieCursorWrapper extends CursorWrapper {
         movie.setVoteAverage(userRating);
         movie.setReleaseDate(releaseDate);
         movie.setPosterImage(posterImage);
+        movie.setPopularity(popularity);
 
         return movie;
     }

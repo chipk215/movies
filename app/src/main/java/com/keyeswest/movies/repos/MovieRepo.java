@@ -82,15 +82,9 @@ public class MovieRepo  {
         String selectionClause = MovieContract.MovieTable.COLUMN_MOVIE_ID + "=  ?";
         String[] selectionArgs = { Long.toString(movieId) };
 
-        // request only the id field
-        String[] projection={
-                MovieContract.MovieTable.COLUMN_MOVIE_ID
-        };
-
         Bundle queryBundle = new Bundle();
         queryBundle.putString(SELECTION_CLAUSE_KEY, selectionClause);
         queryBundle.putStringArray(SELECTION_ARGS_KEY, selectionArgs);
-        queryBundle.putStringArray(PROJECTION_ARGS_KEY, projection);
         queryBundle.putSerializable(OPERATION_KEY, Operations.QUERY_SET);
 
         SqlTask sqlTask = new SqlTask(mContext);
@@ -100,9 +94,15 @@ public class MovieRepo  {
     }
 
     public void getMovieCount( QueryCountResult callback){
-        //TODO use projection to only count ids
+
+        // request only the id field
+        String[] projection={
+                MovieContract.MovieTable.COLUMN_MOVIE_ID
+        };
+
         Bundle queryBundle = new Bundle();
         queryBundle.putSerializable(OPERATION_KEY, Operations.QUERY_COUNT);
+        queryBundle.putStringArray(PROJECTION_ARGS_KEY, projection);
         SqlTask sqlTask = new SqlTask(mContext);
         sqlTask.setQueryCountResult(callback);
         sqlTask.execute(queryBundle);
