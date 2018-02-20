@@ -62,8 +62,10 @@ public class MovieFetcher  {
     private MovieRepo mMovieRepo;
 
 
+ //==================================== REVIEWER ADD YOU API KEY HERE =============================
     @SuppressWarnings("FieldCanBeLocal")
     private static final String API_KEY = BuildConfig.API_KEY;
+ //================================================================================================
 
     private URL buildMoviesURL(int requestPageNumber){
 
